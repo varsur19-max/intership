@@ -1,0 +1,322 @@
+:root {
+    font-family:Arial,sans-serif;
+    color:#193332;
+    background:#f5f7f5;
+    line-height:1.6
+}
+
+* {
+    box-sizing:border-box
+}
+
+body {
+    margin:0
+}
+
+a {
+    color:#166453;
+    text-decoration:none
+}
+
+a:hover {
+    text-decoration:underline
+}
+
+button,input,textarea,select {
+    font:inherit
+}
+
+button {
+    cursor:pointer;
+    border:1px solid #cbd8d1;
+    border-radius:9px;
+    padding:9px 14px;
+    background:white;
+    color:#25433d
+}
+
+button:hover {
+    background:#edf5ee
+}
+
+button:disabled {
+    opacity:.5;
+    cursor:wait
+}
+
+button:focus-visible,a:focus-visible {
+    outline:3px solid #d09332;
+    outline-offset:3px
+}
+
+.header {
+    background:white;
+    border-bottom:1px solid #dce4df;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:24px;
+    padding:24px 5%
+}
+
+.brand {
+    font-weight:900;
+    letter-spacing:2px;
+    color:#193332
+}
+
+.header nav {
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px
+}
+
+.layout {
+    max-width:1440px;
+    margin:40px auto;
+    display:grid;
+    grid-template-columns:280px minmax(0,1fr);
+    gap:38px;
+    padding:0 32px;
+    min-height:65vh
+}
+
+.sidebar {
+    background:#eaf0e9;
+    border-radius:16px;
+    padding:22px;
+    overflow:auto;
+    align-self:start;
+    max-height:80vh
+}
+
+.sidebar h2 {
+    font-size:17px;
+    margin-top:0
+}
+
+.menu-button {
+    display:block;
+    width:100%;
+    text-align:left;
+    margin:5px 0;
+    overflow-wrap:anywhere;
+    min-width:110px
+}
+
+.children {
+    margin-left:13px;
+    padding-left:10px;
+    border-left:1px solid #bacdbd
+}
+
+.menu-link {
+    font-size:12px
+}
+
+.eyebrow {
+    letter-spacing:2px;
+    color:#577362;
+    font-size:12px
+}
+
+h1 {
+    font-size:clamp(26px,3vw,40px);
+    letter-spacing:-1px;
+    line-height:1.2;
+    margin:10px 0 18px
+}
+
+h2 {
+    font-size:20px;
+    overflow-wrap:anywhere
+}
+
+.muted {
+    color:#6a7c73;
+    font-size:14px
+}
+
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:20px;
+    margin-top:30px
+}
+
+.card {
+    border:1px solid #dce4dd;
+    border-radius:16px;
+    padding:24px;
+    background:white
+}
+
+.badge {
+    border-radius:6px;
+    padding:4px 9px;
+    background:#edf1e9;
+    color:#617452;
+    font-size:12px
+}
+
+.price {
+    font-size:25px;
+    font-weight:700
+}
+
+.summary {
+    display:-webkit-box;
+    -webkit-line-clamp:3;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    color:#5f7069;
+    overflow-wrap:anywhere
+}
+
+.description {
+    white-space:pre-wrap;
+    overflow-wrap:anywhere
+}
+
+.actions {
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap
+}
+
+.actions a {
+    font-size:14px
+}
+
+.danger {
+    color:#a33332
+}
+
+.form {
+    max-width:650px;
+    display:grid;
+    gap:18px;
+    margin-top:20px
+}
+
+label {
+    display:grid;
+    gap:6px;
+    font-size:14px;
+    font-weight:600
+}
+
+input,textarea,select {
+    width:100%;
+    min-width:0;
+    border:1px solid #c6d4cd;
+    background:white;
+    border-radius:8px;
+    padding:12px;
+    color:#203d32
+}
+
+textarea {
+    min-height:130px;
+    resize:vertical
+}
+
+.primary {
+    background:#205e46;
+    color:white
+}
+
+.primary:hover {
+    background:#164b36
+}
+
+.notice {
+    padding:15px;
+    border-radius:9px;
+    background:#e5f1e7;
+    overflow-wrap:anywhere
+}
+
+.error {
+    background:#ffe9e5;
+    color:#9a3232
+}
+
+.admin-list {
+    margin-top:24px
+}
+
+.admin-row {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    border-bottom:1px solid #dbe4dc;
+    padding:18px 0;
+    overflow-wrap:anywhere
+}
+
+footer {
+    padding:30px 5%;
+    font-size:12px;
+    color:#77877c;
+    border-top:1px solid #dde5dd
+}
+
+[hidden] {
+    display:none!important
+}
+
+@media(max-width:800px) {
+    .header {
+    align-items:flex-start;
+    flex-direction:column
+}
+
+.layout {
+    grid-template-columns:1fr;
+    padding:0 18px;
+    gap:24px;
+    margin-top:24px
+}
+
+.sidebar {
+    max-height:350px
+}
+
+.admin-row {
+    align-items:flex-start;
+    flex-direction:column
+}
+
+
+}
+
+.product-image { display:block; width:100%; max-width:650px; height:280px; object-fit:contain; background:#fff; border:1px solid #dce4dd; border-radius:12px; margin-bottom:16px; }
+.card .product-image { height:180px; }
+.language-buttons { display:flex; flex-wrap:wrap; gap:8px; }
+.language-buttons button { display:flex; align-items:center; gap:7px; font-size:13px; }
+.language-buttons [aria-pressed="true"] { border-color:#205e46; background:#e5f1e7; font-weight:bold; }
+.flag { display:inline-block; width:27px; height:18px; border:1px solid #ccc; flex-shrink:0; }
+.flag-hy { background:linear-gradient(#d90012 0 33.33%,#0033a0 33.33% 66.66%,#f2a800 66.66%); }
+.flag-en { background:linear-gradient(90deg,transparent 40%,#c8102e 40% 60%,transparent 60%),linear-gradient(transparent 35%,#c8102e 35% 65%,transparent 65%),linear-gradient(90deg,transparent 33%,white 33% 67%,transparent 67%),linear-gradient(transparent 25%,white 25% 75%,transparent 75%),linear-gradient(33deg,transparent 44%,white 44% 56%,transparent 56%),linear-gradient(-33deg,#012169 44%,white 44% 56%,#012169 56%); }
+.checkbox-label { display:flex; align-items:center; gap:10px; }
+.checkbox-label input { width:auto; }
+.header { flex-wrap:wrap; }
+
+/* Drag and drop: միայն բռնիչն է քաշվող, հղումներն ու կոճակները մնում են սեղմելի։ */
+.drag-handle { display: inline-block; padding: 8px 10px; margin-bottom: 8px; border: 1px solid #9baec4; border-radius: 6px; cursor: grab; background: #eef4fb; color: #203854; user-select: none; }
+.drag-handle:active { cursor: grabbing; }
+.dragging { opacity: .5; }
+.drop-zones { display: flex; gap: 8px; flex-wrap: wrap; width: 100%; }
+.drop-zone { border: 2px dashed #93a7bd; border-radius: 7px; padding: 10px 14px; margin: 6px 0; background: #f6f9fc; }
+.drop-active { outline: 3px solid #2563eb; outline-offset: 2px; background: #dbeafe !important; }
+.admin-row { flex-wrap: wrap; }
+#move-notice { position: sticky; top: 8px; z-index: 5; }
+
+/* Keep card size stable while revealing its product drag handle. */
+.product-drag-handle { visibility: hidden; opacity: 0; }
+.card:hover > .product-drag-handle,
+.card.dragging > .product-drag-handle { visibility: visible; opacity: 1; }
