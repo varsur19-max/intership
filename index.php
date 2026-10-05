@@ -15,7 +15,17 @@ if ($basePath !== '' && ($url === $basePath || strpos($url, $basePath . '/') ===
     $url = substr($url, strlen($basePath));
 }
 
-$files = ['/style.css', '/script.js'];
+$files = [
+    '/style.css',
+    '/js/language.js',
+    '/js/common.js',
+    '/js/menu.js',
+    '/js/products.js',
+    '/js/auth.js',
+    '/js/admin.js',
+    '/js/drag-drop.js',
+    '/script.js'
+];
 
 if (in_array($url, $files)) {
     if ($url === '/style.css') {
@@ -24,7 +34,7 @@ if (in_array($url, $files)) {
         header('Content-Type: text/javascript; charset=utf-8');
     }
     header('X-Content-Type-Options: nosniff');
-    readfile(substr($url, 1));
+    readfile(__DIR__ . $url);
     exit;
 }
 
