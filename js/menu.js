@@ -1,7 +1,7 @@
 function showNav() {
     const header = find('#header');
     header.innerHTML = '<nav id="nav"></nav>';
-    const brand = addLink(header, 'INTERSHIP', '/');
+    const brand = addLink(header, 'INTERSHIP1', '/');
     brand.className = 'brand';
     header.prepend(brand);
     showLanguageButtons(header);
