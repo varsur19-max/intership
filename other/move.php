@@ -1,5 +1,4 @@
 <?php
-// Երկու տեղափոխումներն էլ ստուգվում են սերվերում։ CSRF-ը ստուգվում է api/index.php-ում։
 $allowUser = $url === '/api/product/move';
 require_once 'other/auth.php';
 
@@ -28,7 +27,6 @@ if ($id === false || $id < 1 || $target === false || $target < 0 ||
 
 try {
     moveQuery('START TRANSACTION');
-    // Նույն կողպեքն օգտագործում են նաև մենյուի ավելացնել/փոխել/ջնջել գործողությունները։
     $lock = moveQuery('SELECT id FROM menu_lock WHERE id = 1 FOR UPDATE');
     if (!mysqli_fetch_assoc($lock)) {
         throw new RuntimeException('menu_lock row 1 is missing');
@@ -77,7 +75,6 @@ try {
             $visited[$current] = true;
             $current = intval($items[$current]['parent_id']);
         }
-        // Միայն ընտրված ծնողի երեխաներին տալիս ենք հերթական 0, 1, 2 ... թվեր։
         $siblings = [];
         foreach ($items as $itemId => $item) {
             if ($itemId !== $id && intval($item['parent_id']) === $parent) {

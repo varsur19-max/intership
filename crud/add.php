@@ -56,7 +56,6 @@ require_once 'other/product_image.php';
 $image = readProductImage();
 $imageData = $image['data'] ?? null;
 $imageMime = $image['mime'] ?? null;
-// Bound parameters safely send the binary image to MySQL.
 $stmt = mysqli_prepare($db, "INSERT INTO products (name, description, price, stock, category_id, user_id, image_data, image_mime)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 if (!$stmt) {

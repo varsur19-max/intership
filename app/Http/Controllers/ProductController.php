@@ -10,13 +10,11 @@ class ProductController
 {
     private $db;
 
-    // Պահում ենք արդեն db.php-ում բացված բազայի կապը։
     public function __construct(mysqli $db)
     {
         $this->db = $db;
     }
 
-    // Ցույց տալ բոլոր ապրանքները կամ ընտրված կատեգորիայի ապրանքները։
     public function index(Request $request)
     {
         $categorySql = '';
@@ -32,7 +30,6 @@ class ProductController
             $categorySql = " AND products.category_id = $categoryId";
         }
 
-        // Նույն SQL հարցումն է, ինչ նախկին crud/all.php-ում։
         $sql = "SELECT products.id, products.name, products.description, products.price, products.stock, products.user_id, products.is_del, products.created_at, products.updated_at, products.category_id, (products.image_data IS NOT NULL) AS has_image, menu_items.title AS category_name FROM products
                 LEFT JOIN menu_items ON menu_items.id = products.category_id
                 WHERE products.is_del = 0 $categorySql ORDER BY products.id DESC";
@@ -51,7 +48,6 @@ class ProductController
         return new JsonResponse(['products' => $products]);
     }
 
-    // Ցույց տալ մեկ ապրանք՝ իր կատեգորիայով և հեղինակով։
     public function show(Request $request)
     {
         $id = $request->query('id', '');

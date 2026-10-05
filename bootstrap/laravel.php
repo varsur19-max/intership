@@ -6,7 +6,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 
-// Այս ֆայլը կանչվում է միայն ապրանքների երկու GET հարցումների համար։
 $autoload = __DIR__ . '/../vendor/autoload.php';
 
 if (!is_file($autoload)) {
@@ -18,11 +17,9 @@ if (!is_file($autoload)) {
 require_once $autoload;
 
 try {
-    // Container-ը Router-ին տալիս է Controller-ի համար անհրաժեշտ օբյեկտները։
     $container = new Container();
     $container->instance(mysqli::class, $db);
 
-    // $url-ն արդեն առանց /intership սկզբի է։ $_GET-ը հարցման տվյալներն են։
     $request = Request::create($url, 'GET', $_GET);
     $container->instance(Request::class, $request);
 

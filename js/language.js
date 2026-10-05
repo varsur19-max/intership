@@ -1,4 +1,3 @@
-// Հայերեն բնագիրը և անգլերեն թարգմանությունը մեկ բառարանում են։
 const translations = {
     "Քաշիր այստեղից": "Drag from here",
     "Քաշիր ապրանքը դեպի ձախ կողմի կատեգորիան։": "Drag the product onto a category on the left.",
@@ -145,14 +144,12 @@ function showLanguageButtons(header) {
     for (const code of ['hy', 'en']) {
         const button = document.createElement('button');
         button.type = 'button';
-        // CSS flags also work on Windows systems without flag emoji support.
         button.innerHTML = '<span aria-hidden="true" class="flag flag-' + code + '"></span>';
         button.append(document.createTextNode(code === 'hy' ? 'Հայերեն' : 'English'));
         button.lang = code;
         button.setAttribute('aria-pressed', String(code === language));
         button.onclick = async function() {
             if (code === language) return;
-            // Keep entered product/login data when changing language.
             const oldForm = document.querySelector('#product-form, #auth-form');
             const savedFields = oldForm ? Array.from(oldForm.elements).filter(el => el.name).map(el => ({
                 name: el.name, value: el.value, checked: el.checked,
@@ -162,7 +159,6 @@ function showLanguageButtons(header) {
             try { localStorage.setItem('intership-language', code); } catch (error) {}
             language = code;
             document.documentElement.lang = code;
-            // Re-render translated labels without changing the current address.
             await start();
             const newForm = document.querySelector('#product-form, #auth-form');
             if (newForm) {

@@ -88,7 +88,7 @@ $imageSql = $changeImage ? ', image_data = ?, image_mime = ?' : '';
 $imageCondition = $changeImage ? ' OR 1 = 1' : '';
 $imageData = $image['data'] ?? null;
 $imageMime = $image['mime'] ?? null;
-// Leaving the file input empty keeps the existing image.
+
 $sql = "UPDATE products
         SET name = '$name', description = '$description', price = '$price', stock = $stock, category_id = $categorySql,
             updated_at = CURRENT_TIMESTAMP $imageSql

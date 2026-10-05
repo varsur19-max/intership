@@ -1,7 +1,7 @@
 <?php
 
 $basePath = '/intership';
-// HTTPS/Railway-ում՝ պաշտպանված cookie, տեղական HTTP-ում՝ սովորական։
+
 $secureCookies = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (bool) getenv('RAILWAY_ENVIRONMENT_ID');
 if (getenv('SESSION_SECURE_COOKIE') !== false) {

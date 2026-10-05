@@ -59,7 +59,7 @@ if ($url === '/api/session' && $method === 'GET') {
     exit;
 }
 
-// Միայն ապրանքների ընթերցումը փոխանցում ենք Laravel-ի Router-ին։
+
 if (($url === '/api/products' || $url === '/api/product') && $method === 'GET') {
     require __DIR__ . '/../bootstrap/laravel.php';
 } elseif ($url === '/api/menu' && $method === 'GET') {

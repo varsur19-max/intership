@@ -1,5 +1,4 @@
 <?php
-// «Բոլորը» բաժինը կատեգորիայի սահմանափակում չունի։
 $value = trim($_POST['category_id'] ?? '');
 $category_id = null;
 if ($value !== '') {
