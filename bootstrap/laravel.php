@@ -10,7 +10,7 @@ $autoload = __DIR__ . '/../vendor/autoload.php';
 
 if (!is_file($autoload)) {
     http_response_code(503);
-    echo json_encode(['error' => 'Laravel-ի բաղադրիչները տեղադրված չեն։ Նախագծի պանակում գործարկիր composer install։'], JSON_UNESCAPED_UNICODE);
+    echo json_encode(['error' => 'Laravel-ի բաղադրիչները տեղադրված չեն։'], JSON_UNESCAPED_UNICODE);
     exit;
 }
 
