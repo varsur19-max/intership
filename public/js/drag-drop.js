@@ -12,7 +12,7 @@ function createDragHandle(kind, id) {
 
     handle.type = "button";
     handle.className = "drag-handle";
-    handle.textContent = "↕";
+    handle.textContent = "⁞⁞";
     handle.title = t("Քաշիր՝ տեղափոխելու համար");
     handle.setAttribute("aria-label", t("Քաշիր՝ տեղափոխելու համար"));
     handle.draggable = true;
