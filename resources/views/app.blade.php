@@ -25,7 +25,7 @@
         <section class="hero" aria-labelledby="hero-title">
             <div class="hero-copy">
                 <span class="hero-label"><span aria-hidden="true"></span> INTERSHIP / COLLECTION</span>
-                <h1 id="hero-title" data-i18n="Հավաքիր՝ քո ձևով։">Հավաքիր՝ քո ձևով։</h1>
+                <h1 id="hero-title" data-i18n="Ստեղծիր՝ քո ձևով։">Ստեղծիր՝ քո ձևով։</h1>
                 <p data-i18n="Բացահայտիր, ավելացրու և կազմակերպիր ապրանքները մեկ տեղում։">Բացահայտիր, ավելացրու և կազմակերպիր ապրանքները մեկ տեղում։</p>
             </div>
             <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-tile tile-one">↗</div><div class="art-tile tile-two">✳</div><span class="art-caption">CREATED BY YOU</span></div>
