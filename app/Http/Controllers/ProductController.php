@@ -100,7 +100,7 @@ class ProductController extends Controller
                 ->withQueryString()
         );
     }
-
+    
     public function moveToCategory(Request $request, Product $product): JsonResponse
     {
         abort_unless(
@@ -232,7 +232,7 @@ class ProductController extends Controller
 
         if ($newImage && $oldImage) {
             try {
-                if (! Storage::disk('public')->delete($oldImage)) {
+                if (!Storage::disk('public')->delete($oldImage)) {
                     report(new \RuntimeException('Could not remove replaced product image.'));
                 }
             } catch (\Throwable $error) {
@@ -264,7 +264,7 @@ class ProductController extends Controller
     {
         $user = $request->user();
 
-        if (! $user) {
+        if (!$user) {
             return false;
         }
 

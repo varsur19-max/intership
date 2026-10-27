@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'app')->name('home');
@@ -17,6 +18,9 @@ Route::post('/login', [AuthController::class, 'login'])
 
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth');
+
+Route::post('/contact', [ContactController::class, 'send'])
+    ->middleware(['auth', 'throttle:3,1']);
 
 Route::get('/products', [ProductController::class, 'index']);
 

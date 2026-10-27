@@ -920,3 +920,43 @@ footer > span:last-child {
 #category-menu li:hover > ul {
     display: block;
 }
+
+.contact-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: #173f3599;
+}
+
+.modal {
+    width: 100%;
+    max-width: 520px;
+    padding: 28px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+#contact-error {
+    color: var(--red);
+}
+
+#contact-error:empty {
+    display: none;
+}
