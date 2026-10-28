@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\MenuItem;
 use App\Models\Product;
+use Illuminate\Auth\Events\Failed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 
 class ProductController extends Controller
 {
@@ -82,6 +85,7 @@ class ProductController extends Controller
                 'integer',
                 'exists:menu_items,id',
             ],
+            'search' => ['nullable', 'string', 'max:150'],
         ]);
 
         $query = Product::with([
@@ -89,18 +93,120 @@ class ProductController extends Controller
             'category:id,title',
         ]);
 
-        if (isset($data['category_id'])) {
-            $query->where('category_id', $data['category_id']);
+        $categoryIds = isset($data['category_id'])
+            ? $this->categoryWithDescendantIds((int) $data['category_id'])
+            : null;
+
+        if ($categoryIds !== null) {
+            $query->whereIn('category_id', $categoryIds);
         }
 
-        return response()->json(
-            $query->orderBy('sort_order')
-                ->orderByDesc('id')
-                ->paginate(5)
-                ->withQueryString()
-        );
+        if (filled($data['search'] ?? null)) {
+            $query->where(
+                'name',
+                'like',
+                '%' . $this->escapeLike($data['search']) . '%'
+            );
+        }
+
+        $result = $query->orderBy('sort_order')
+            ->orderByDesc('id')
+            ->paginate(5)
+            ->withQueryString()
+            ->toArray();
+
+        $result['suggestions'] = filled($data['search'] ?? null) && $result['total'] === 0
+            ? $this->suggestProducts($data['search'], $categoryIds)
+            : [];
+
+        return response()->json($result);
     }
-    
+
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $value);
+    }
+
+    private function categoryWithDescendantIds(int $categoryId): array
+    {
+        $childrenByParent = MenuItem::get(['id', 'parent_id'])
+            ->groupBy('parent_id');
+
+        $ids = [$categoryId];
+        $queue = [$categoryId];
+
+        while ($queue) {
+            $current = array_shift($queue);
+
+            foreach ($childrenByParent->get($current, []) as $child) {
+                if (!in_array($child->id, $ids, true)) {
+                    $ids[] = $child->id;
+                    $queue[] = $child->id;
+                }
+            }
+        }
+
+        return $ids;
+    }
+
+    private function mbLevenshtein(string $first, string $second): int
+    {
+        $map = [];
+
+        $encode = function (string $text) use (&$map): string {
+            $result = '';
+
+            foreach (mb_str_split($text) as $char) {
+                if (!isset($map[$char])) {
+                    $map[$char] = chr(count($map));
+                }
+
+                $result .= $map[$char];
+            }
+
+            return $result;
+        };
+
+        return levenshtein($encode($first), $encode($second));
+    }
+
+    private function distanceToName(string $needle, string $name): int
+    {
+        $name = mb_strtolower($name);
+
+        $candidates = array_merge([$name], preg_split('/\s+/u', $name));
+
+        return min(array_map(
+            fn(string $candidate) => $this->mbLevenshtein($needle, $candidate),
+            $candidates
+        ));
+    }
+
+    private function suggestProducts(string $search, ?array $categoryIds): array
+    {
+        $needle = mb_strtolower($search);
+        $maxDistance = (int) ceil(mb_strlen($needle) * 0.4);
+
+        $query = Product::query();
+
+        if ($categoryIds !== null) {
+            $query->whereIn('category_id', $categoryIds);
+        }
+
+        return $query->pluck('name')
+            ->unique()
+            ->map(fn(string $name) => [
+                'name' => $name,
+                'distance' => $this->distanceToName($needle, $name),
+            ])
+            ->filter(fn(array $item) => $item['distance'] <= $maxDistance)
+            ->sortBy('distance')
+            ->take(5)
+            ->pluck('name')
+            ->values()
+            ->all();
+    }
+
     public function moveToCategory(Request $request, Product $product): JsonResponse
     {
         abort_unless(
@@ -139,9 +245,9 @@ class ProductController extends Controller
         return response()->json($categories);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreProductRequest $request): JsonResponse
     {
-        $data = $this->validateProduct($request);
+        $data = $request->validated();
 
         unset($data['image']);
 
@@ -188,15 +294,9 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(Request $request, Product $product): JsonResponse
+    public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
-        abort_unless(
-            $this->canManage($request, $product),
-            403,
-            'Դու իրավունք չունես խմբագրելու այս ապրանքը։'
-        );
-
-        $data = $this->validateProduct($request);
+        $data = $request->validated();
 
         unset($data['image']);
 
@@ -270,57 +370,5 @@ class ProductController extends Controller
 
         return (int) $product->user_id === (int) $user->id
             || $user->isAdmin();
-    }
-
-    private function validateProduct(Request $request): array
-    {
-        return $request->validate([
-            'name' => ['required', 'string', 'max:150'],
-            'description' => ['required', 'string', 'max:10000'],
-            'price' => [
-                'required',
-                'numeric',
-                'min:0',
-                'max:99999999.99',
-                'decimal:0,2',
-            ],
-            'stock' => [
-                'required',
-                'integer',
-                'min:0',
-                'max:4294967295',
-            ],
-            'category_id' => [
-                'nullable',
-                'integer',
-                'exists:menu_items,id',
-            ],
-
-            'image' => [
-                'nullable',
-                'image',
-                'mimes:jpg,jpeg,png,webp',
-                'max:2048',
-            ],
-        ], [
-            'name.required' => 'Գրիր ապրանքի անունը։',
-            'name.max' => 'Անունը կարող է ունենալ առավելագույնը 150 նիշ։',
-            'description.required' => 'Գրիր նկարագրությունը։',
-            'description.max' => 'Նկարագրությունը չափազանց երկար է։',
-            'price.required' => 'Գրիր գինը։',
-            'price.numeric' => 'Գինը պետք է լինի թիվ։',
-            'price.min' => 'Գինը չի կարող բացասական լինել։',
-            'price.max' => 'Գինը չափազանց մեծ է։',
-            'price.decimal' => 'Գինը կարող է ունենալ մինչև 2 տասնորդական նիշ։',
-            'stock.required' => 'Գրիր քանակը։',
-            'stock.integer' => 'Քանակը պետք է լինի ամբողջ թիվ։',
-            'stock.min' => 'Քանակը չի կարող բացասական լինել։',
-            'stock.max' => 'Քանակը չափազանց մեծ է։',
-            'category_id.exists' => 'Ընտրված կատեգորիան գոյություն չունի։',
-            'image.image' => 'Ընտրված ֆայլը պետք է լինի նկար։',
-            'image.mimes' => 'Թույլատրվում են միայն JPG, PNG և WebP նկարներ։',
-            'image.max' => 'Նկարի առավելագույն չափը 2 ՄԲ է։',
-            'image.uploaded' => 'Նկարի վերբեռնումը չհաջողվեց։ Ստուգիր ֆայլի չափը։',
-        ]);
     }
 }

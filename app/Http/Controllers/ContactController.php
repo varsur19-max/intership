@@ -17,8 +17,8 @@ class ContactController extends Controller
             ],
             [
                 'message.required' => 'Գրիր նամակը այստեղ։',
-                'message.min' => 'նամակը պետք է ունենա առնվազն 10 նիշ։',
-                'message.max' => 'նամակը չափազանց երկար է։',
+                'message.min' => 'Նամակը պետք է ունենա առնվազն 10 նիշ։',
+                'message.max' => 'Նամակը չափազանց երկար է։',
             ]
         );
 
@@ -26,7 +26,7 @@ class ContactController extends Controller
 
         return response()->json(
             [
-                'message' => 'նամակը ուղարկվեց։',
+                'message' => 'Նամակը ուղարկվեց։',
             ]
         );
     }

@@ -1,6 +1,6 @@
 function openContactModal() {
     if (!currentUser) {
-        message.textContent = t("նամակ գրելու համար մուտք գործիր։");
+        message.textContent = t("Նամակ գրելու համար մուտք գործիր։");
         message.scrollIntoView({ behavior: "smooth" });
         return;
     }
@@ -9,7 +9,7 @@ function openContactModal() {
     overlay.className = "modal-overlay";
     overlay.innerHTML = `
         <div class="modal" role="dialog" aria-modal="true" aria-labelledby="contact-title">
-            <h2 id="contact-title">${t("կապնվել մեզ հետ")}</h2>
+            <h2 id="contact-title">${t("Կապվել մեզ հետ")}</h2>
             <form id="contact-form">
                 <label>
                     ${t("Քո նամակը")}

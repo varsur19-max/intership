@@ -833,6 +833,15 @@ footer > span:last-child {
     footer > span:last-child {
         display: none;
     }
+    .site-header {
+        flex-wrap: wrap;
+    }
+    .search-form {
+        order: 3;
+        flex-basis: 100%;
+        max-width: none;
+        margin-bottom: 12px;
+    }
 }
 @media (max-width: 420px) {
     #products-list {
@@ -959,4 +968,47 @@ footer > span:last-child {
 
 #contact-error:empty {
     display: none;
+}
+
+.search-form {
+    position: relative;
+    display: flex;
+    flex: 1;
+    gap: 8px;
+    max-width: 520px;
+}
+.search-form input {
+    flex: 1;
+}
+.search-form button[type="submit"] {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--paper);
+}
+#search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    margin-top: 6px;
+    padding: 8px;
+    display: grid;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+#search-suggestions[hidden] {
+    display: none;
+}
+#search-suggestions p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+}
+#search-suggestions button {
+    text-align: left;
+    border-color: transparent;
 }

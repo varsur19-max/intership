@@ -135,7 +135,7 @@
     "Գաղտնաբառը չի կարող գերազանցել 72 բայթը։": "The password cannot exceed 72 bytes.",
     "Թարմացրու էջը և փորձիր կրկին։": "Refresh the page and try again.",
     "Լեզուն փոխելիս չպահպանված տվյալները կկորչեն։ Շարունակե՞լ։": "Changing language will discard unsaved changes. Continue?",
-    "Կապնվել մեզ հետ": "Contact us",
+    "Կապվել մեզ հետ": "Contact us",
     "Նամակ գրելու համար մուտք գործիր։": "Log in to send a message.",
     "Քո նամակը": "Your message",
     "Չեղարկել": "Cancel",
@@ -143,5 +143,9 @@
     "Գրիր նամակի տեքստը։": "Write your message.",
     "Նամակը պետք է ունենա առնվազն 10 նիշ։": "The message must be at least 10 characters.",
     "Նամակը չափազանց երկար է։": "The message is too long.",
-    "Նամակը ուղարկվեց։": "Your message has been sent."
+    "Նամակը ուղարկվեց։": "Your message has been sent.",
+    "Որոնել": "Search",
+    "Որոնել ապրանք...": "Search products...",
+    "Այդպիսի ապրանք չկա։": "No such product.",
+    "Գուցե նկատի ունեիր՝": "Did you mean:"
 }

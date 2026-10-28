@@ -125,6 +125,45 @@ class ProjectRegressionTest extends TestCase
         $this->assertDatabaseHas('products', ['name' => 'New lamp', 'user_id' => $owner->id]);
     }
 
+    public function test_product_store_rejects_missing_name(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->postJson('/products', $this->payload(['name' => '']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['name']);
+
+        $this->assertDatabaseCount('products', 0);
+    }
+
+    public function test_product_store_returns_armenian_validation_message(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->postJson('/products', $this->payload(['name' => '']))
+            ->assertJsonValidationErrors(['name' => 'Գրիր ապրանքի անունը։']);
+    }
+
+    public function test_owner_update_with_invalid_data_returns_validation_error(): void
+    {
+        $owner = User::factory()->create();
+        $product = $this->product($owner);
+
+        $this->actingAs($owner)
+            ->putJson('/products/' . $product->id, $this->payload(['price' => 'abc']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['price']);
+
+        $this->assertDatabaseHas('products', ['id' => $product->id, 'name' => 'Desk lamp']);
+    }
+
+    public function test_other_user_gets_forbidden_even_with_invalid_update_data(): void
+    {
+        $product = $this->product(User::factory()->create());
+
+        $this->actingAs(User::factory()->create())
+            ->putJson('/products/' . $product->id, $this->payload(['name' => '']))
+            ->assertForbidden();
+    }
+
     public function test_product_update_without_upload_preserves_image(): void
     {
         Storage::fake('public');
@@ -192,6 +231,94 @@ class ProjectRegressionTest extends TestCase
         $this->getJson('/products?category_id=' . $category->id . '&page=2')->assertOk()
             ->assertJsonPath('total', 6)->assertJsonPath('current_page', 2)->assertJsonCount(1, 'data');
         $this->getJson('/products?page=-1')->assertUnprocessable()->assertJsonValidationErrors(['page']);
+    }
+
+    public function test_parent_category_includes_products_from_all_descendants(): void
+    {
+        $owner = User::factory()->create();
+
+        $parent = MenuItem::create(['title' => 'Parent', 'parent_id' => null, 'sort_order' => 0]);
+        $child = MenuItem::create(['title' => 'Child', 'parent_id' => $parent->id, 'sort_order' => 0]);
+        $grandchild = MenuItem::create(['title' => 'Grandchild', 'parent_id' => $child->id, 'sort_order' => 0]);
+
+        $this->product($owner, ['category_id' => $parent->id]);
+        $this->product($owner, ['category_id' => $child->id]);
+        $this->product($owner, ['category_id' => $grandchild->id]);
+        $this->product($owner);
+
+        $this->getJson('/products?category_id=' . $parent->id)
+            ->assertOk()
+            ->assertJsonPath('total', 3);
+
+        $this->getJson('/products?category_id=' . $child->id)
+            ->assertJsonPath('total', 2);
+
+        $this->getJson('/products?category_id=' . $grandchild->id)
+            ->assertJsonPath('total', 1);
+    }
+
+    public function test_search_filters_products_by_name_and_category(): void
+    {
+        $owner = User::factory()->create();
+
+        $lighting = MenuItem::create(['title' => 'Lighting', 'parent_id' => null, 'sort_order' => 0]);
+        $furniture = MenuItem::create(['title' => 'Furniture', 'parent_id' => null, 'sort_order' => 1]);
+
+        $this->product($owner, ['name' => 'Desk lamp', 'category_id' => $lighting->id]);
+        $this->product($owner, ['name' => 'Floor lamp', 'category_id' => $furniture->id]);
+        $this->product($owner, ['name' => 'Chair', 'category_id' => $furniture->id]);
+
+        $this->getJson('/products?search=lamp')
+            ->assertOk()
+            ->assertJsonPath('total', 2);
+
+        $this->getJson('/products?search=LAMP')
+            ->assertJsonPath('total', 2);
+
+        $this->getJson('/products?search=lamp&category_id=' . $lighting->id)
+            ->assertJsonPath('total', 1)
+            ->assertJsonPath('data.0.name', 'Desk lamp');
+
+        $this->getJson('/products?search=zzzz')
+            ->assertJsonPath('total', 0);
+
+        $this->getJson('/products?search=' . urlencode('%'))
+            ->assertJsonPath('total', 0);
+    }
+
+    public function test_search_suggests_only_close_matches(): void
+    {
+        $owner = User::factory()->create();
+
+        $this->product($owner, ['name' => 'Desk lamp']);
+        $this->product($owner, ['name' => 'Chair']);
+        $this->product($owner, ['name' => 'Սեղանի լամպ']);
+
+        $this->getJson('/products?search=' . urlencode('Desk lmap'))
+            ->assertOk()
+            ->assertJsonPath('total', 0)
+            ->assertJsonPath('suggestions.0', 'Desk lamp');
+
+        $this->getJson('/products?search=' . urlencode('Սեղանի լամփ'))
+            ->assertJsonPath('total', 0)
+            ->assertJsonPath('suggestions.0', 'Սեղանի լամպ');
+
+        $this->getJson('/products?search=xqzkwv')
+            ->assertJsonPath('total', 0)
+            ->assertJsonPath('suggestions', []);
+
+        $this->getJson('/products?search=lamp')
+            ->assertJsonPath('suggestions', []);
+
+    }
+
+    public function test_home_page_contains_search_form_and_script(): void
+    {
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('id="search-form"', false)
+            ->assertSee('id="search-input"', false)
+            ->assertSee('js/search.js', false);
     }
 
     public function test_regular_user_cannot_manage_categories_or_reorder(): void
@@ -276,7 +403,7 @@ class ProjectRegressionTest extends TestCase
         $this->actingAs($user)
             ->postJson('/contact', ['message' => 'Hello this is a test'])
             ->assertOk();
-        
+
         Mail::assertSent(ContactMail::class, function (ContactMail $mail) use ($user) {
             return $mail->sender->is($user)
                 && $mail->hasTo('owner@example.test');

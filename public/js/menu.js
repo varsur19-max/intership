@@ -43,6 +43,7 @@ function renderMenu() {
     }
 
     allButton.addEventListener("click", function () {
+        resetSearch();
         selectCategory(null);
     });
 

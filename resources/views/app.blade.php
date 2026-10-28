@@ -12,7 +12,7 @@
     <script>
         const englishTranslations = {{ Illuminate\Support\Js::from(json_decode(file_get_contents(lang_path('en.json')), true, 512, JSON_THROW_ON_ERROR)) }};
     </script>
-    @foreach (['language', 'common', 'drag-drop', 'auth', 'contact', 'products', 'menu', 'app'] as $script)
+    @foreach (['language', 'common', 'drag-drop', 'auth', 'contact', 'products', 'menu', 'search', 'app'] as $script)
         <script src="{{ asset('js/' . $script . '.js') }}?v={{ filemtime(public_path('js/' . $script . '.js')) }}"
             defer></script>
     @endforeach
@@ -23,6 +23,13 @@
         <header class="site-header">
             <a class="brand" href="{{ route('home') }}" aria-label="Intership"><span class="brand-mark"
                     aria-hidden="true">i.</span>intership<span class="brand-dot">®</span></a>
+
+            <form id="search-form" class="search-form" role="search" autocomplete="off">
+                <input id="search-input" type="search" name="search" maxlength="150">
+                <button type="submit" data-i18n="Որոնել">Որոնել</button>
+                <div id="search-suggestions" hidden></div>
+            </form>
+
             <div id="language-switcher" aria-label="Language"></div>
         </header>
         <nav id="navigation" aria-label="Navigation"></nav>
@@ -59,11 +66,8 @@
             <span data-i18n="Քո տարածքը։ Քո ընտրությունը։">Քո
                 տարածքը։ Քո ընտրությունը։
             </span>
-            <span>
-                MADE TO ORGANIZE ↗
-            </span>
             <span class="contact-block">
-                <span data-i18n="կապնվել մեզ հետ">կապնվել մեզ հետ</span>
+                <span data-i18n="Կապվել մեզ հետ">Կապվել մեզ հետ</span>
                 <button type="button" id="contact-button">{{ config('services.contact.email') }}</button>
             </span>
         </footer>

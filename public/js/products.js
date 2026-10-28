@@ -18,6 +18,10 @@ async function showProducts(page = currentPage) {
             params.set("category_id", selectedCategory);
         }
 
+        if (searchQuery !== "") {
+            params.set("search", searchQuery);
+        }
+
         const result = await request("/products?" + params.toString());
         if (!isCurrentView(viewId)) return;
         currentPage = result.current_page;
@@ -26,13 +30,19 @@ async function showProducts(page = currentPage) {
         document.getElementById("catalog-count").textContent =
             result.total + " " + t("ապրանք");
 
+        renderSuggestions(result.suggestions ?? []);
+
         list.textContent = "";
 
         if (result.data.length === 0) {
-            list.textContent =
-                selectedCategory === null
-                    ? t("Ապրանքներ դեռ չկան։")
-                    : t("Այս կատեգորիայում ապրանքներ չկան։");
+            if (searchQuery !== "") {
+                list.textContent = t("Այդպիսի ապրանք չկա։");
+            } else {
+                list.textContent =
+                    selectedCategory === null
+                        ? t("Ապրանքներ դեռ չկան։")
+                        : t("Այս կատեգորիայում ապրանքներ չկան։");
+            }
             return;
         }
 
@@ -330,6 +340,7 @@ async function showProductForm(productId = null) {
         if (isEdit) {
             await showProduct(productId);
         } else {
+            resetSearch();
             await selectCategory(null);
         }
     });

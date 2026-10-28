@@ -14,6 +14,7 @@ async function start() {
         document
             .getElementById("products-button")
             .addEventListener("click", function () {
+                resetSearch();
                 selectCategory(null);
             });
 

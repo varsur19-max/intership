@@ -4,6 +4,7 @@ const message = document.getElementById("message");
 let currentUser = null;
 let menuItems = [];
 let selectedCategory = null;
+let searchQuery = "";
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
@@ -13,6 +14,7 @@ let currentPage = 1;
 function beginView(name) {
     content.dataset.view = name;
     message.textContent = "";
+    hideSuggestions();
     return ++viewVersion;
 }
 function isCurrentView(version) {
