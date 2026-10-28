@@ -2,36 +2,52 @@
 
 namespace Database\Seeders;
 
-use Hash;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class ProductSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        DB::table('users')->updateOrInsert([
-            'id' => 1,
-            'name' => 'admin',
-            'email' => 'admin@gmail.com',
-            'password' => Hash::make('admin'),
-            'username' => 'admin',
-            'role' => 'admin',
-        ]);
+        DB::table('users')->updateOrInsert(
+            ['email' => 'admin@gmail.com'],
+            [
+                'id' => 1,
+                'name' => 'admin',
+                'username' => 'admin',
+                'password' => Hash::make('admin'),
+                'role' => 'admin',
+            ]
+        );
 
-        DB::table('products')->updateOrInsert([
-            'id' => 1,
-            'name' => 'test product1',
-            'description' => 'test product1',
-            'price' => 1,
-            'stock' => 1,
-            'image' => 'products/mlfC9Hycs3Msf66xLh4zcaAzOdZ0r2cxZt8hMCTw.jpg',
-            'category_id' => 1,
-            'sort_order' => 0,
-            'user_id' => 1,
-        ]);
+        DB::table('users')->updateOrInsert(
+            ['email' => 'user@gmail.com'],
+            [
+                'id' => 2,
+                'name' => 'user',
+                'username' => 'user',
+                'password' => Hash::make('user'),
+                'role' => 'user'
+            ]
+        );
+
+        $user = DB::table('users')
+            ->where('email', 'admin@gmail.com')
+            ->first();
+
+        DB::table('products')->updateOrInsert(
+            ['id' => 1],
+            [
+                'name' => 'test product1',
+                'description' => 'test product1',
+                'price' => 1,
+                'stock' => 1,
+                'image' => 'products/mlfC9Hycs3Msf66xLh4zcaAzOdZ0r2cxZt8hMCTw.jpg',
+                'category_id' => null,
+                'sort_order' => 0,
+                'user_id' => $user->id,
+            ]
+        );
     }
 }

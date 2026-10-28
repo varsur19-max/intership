@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             at: '*',
             headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO
         );
+        $middleware->alias([
+            'admin' => \App\Http\Middleware\EnsureAdmin::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

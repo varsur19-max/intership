@@ -12,10 +12,10 @@ class DatabaseSeeder extends Seeder
 
     /**
      * Seed the application's database.
-     */
+    */
     public function run(): void
     {
-        if (! app()->environment(['local', 'testing'])) {
+        if (!app()->environment(['local', 'testing'])) {
             return;
         }
 
@@ -27,6 +27,10 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'username' => 'test_user',
             'email' => 'test@example.com',
+        ]);
+
+        $this->call([
+            ProductSeeder::class,
         ]);
     }
 }
