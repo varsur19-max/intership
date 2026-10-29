@@ -236,14 +236,14 @@ class ProductController extends Controller
         ]);
     }
 
-    public function categories(): JsonResponse
-    {
-        $categories = MenuItem::orderBy('sort_order')
-            ->orderBy('id')
-            ->get(['id', 'title']);
+    // public function categories(): JsonResponse
+    // {
+    //     $categories = MenuItem::orderBy('sort_order')
+    //         ->orderBy('id')
+    //         ->get(['id', 'title']);
 
-        return response()->json($categories);
-    }
+    //     return response()->json($categories);
+    // }
 
     public function store(StoreProductRequest $request): JsonResponse
     {

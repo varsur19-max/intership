@@ -12,6 +12,7 @@
     <script>
         const englishTranslations = {{ Illuminate\Support\Js::from(json_decode(file_get_contents(lang_path('en.json')), true, 512, JSON_THROW_ON_ERROR)) }};
     </script>
+    @vite(['resources/js/app.js'])
     @foreach (['language', 'common', 'drag-drop', 'auth', 'contact', 'products', 'menu', 'search', 'app'] as $script)
         <script src="{{ asset('js/' . $script . '.js') }}?v={{ filemtime(public_path('js/' . $script . '.js')) }}"
             defer></script>

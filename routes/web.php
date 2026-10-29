@@ -24,7 +24,7 @@ Route::post('/contact', [ContactController::class, 'send'])
 
 Route::get('/products', [ProductController::class, 'index']);
 
-Route::get('/categories', [ProductController::class, 'categories']);
+// Route::get('/categories', [ProductController::class, 'categories']);
 
 Route::post('/products', [ProductController::class, 'store'])
     ->middleware('auth');
@@ -42,7 +42,7 @@ Route::delete('/products/{product}', [ProductController::class, 'destroy'])
 
 Route::get('/menu-items', [MenuItemController::class, 'index']);
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/menu-items', [MenuItemController::class, 'store']);
 
     Route::put('/menu-items/{menuItem}', [MenuItemController::class, 'update'])
