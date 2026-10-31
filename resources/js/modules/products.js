@@ -1,8 +1,21 @@
-async function showProducts(page = currentPage) {
+import { elements, state } from "./state.js";
+import { renderSuggestions, resetSearch } from "./search.js";
+import {
+    beginView,
+    isCurrentView,
+    productPlaceholder,
+    request,
+} from "./common.js";
+import { categoryOptions, selectCategory } from "./menu.js";
+import { showForm } from "./auth.js";
+import { t } from "./language.js";
+import { enableProductDrag } from "./drag-drop.js";
+
+export async function showProducts(page = state.currentPage) {
     const viewId = beginView("catalog");
-    message.textContent = "";
+    elements.message.textContent = "";
     if (!isCurrentView(viewId)) return;
-    content.innerHTML = `
+    elements.content.innerHTML = `
         <div class="section-heading"><div><p class="eyebrow">${t("ՔՈ ԿԱՏԱԼՈԳԸ")}</p><h2>${t("Ապրանքներ")}</h2></div><span id="catalog-count" class="count-pill"></span></div>
         <div id="products-list">${t("Բեռնվում է...")}</div>
         <div id="pagination"></div>
@@ -14,17 +27,17 @@ async function showProducts(page = currentPage) {
     try {
         const params = new URLSearchParams({ page });
 
-        if (selectedCategory !== null) {
-            params.set("category_id", selectedCategory);
+        if (state.selectedCategory !== null) {
+            params.set("category_id", state.selectedCategory);
         }
 
-        if (searchQuery !== "") {
-            params.set("search", searchQuery);
+        if (state.searchQuery !== "") {
+            params.set("search", state.searchQuery);
         }
 
         const result = await request("/products?" + params.toString());
         if (!isCurrentView(viewId)) return;
-        currentPage = result.current_page;
+        state.currentPage = result.current_page;
         if (result.current_page > result.last_page)
             return showProducts(result.last_page);
         document.getElementById("catalog-count").textContent =
@@ -35,11 +48,11 @@ async function showProducts(page = currentPage) {
         list.textContent = "";
 
         if (result.data.length === 0) {
-            if (searchQuery !== "") {
+            if (state.searchQuery !== "") {
                 list.textContent = t("Այդպիսի ապրանք չկա։");
             } else {
                 list.textContent =
-                    selectedCategory === null
+                    state.selectedCategory === null
                         ? t("Ապրանքներ դեռ չկան։")
                         : t("Այս կատեգորիայում ապրանքներ չկան։");
             }
@@ -132,19 +145,19 @@ async function showProducts(page = currentPage) {
     } catch (error) {
         if (!isCurrentView(viewId)) return;
         list.textContent = "";
-        message.textContent = error.message;
+        elements.message.textContent = error.message;
     }
 }
 
-async function showProductForm(productId = null) {
+export async function showProductForm(productId = null) {
     const viewId = beginView("product-form");
-    if (!currentUser) {
+    if (!state.currentUser) {
         showForm("login");
         return;
     }
 
-    message.textContent = "";
-    content.textContent = t("Բեռնվում է...");
+    elements.message.textContent = "";
+    elements.content.textContent = t("Բեռնվում է...");
 
     const isEdit = productId !== null;
 
@@ -167,13 +180,13 @@ async function showProductForm(productId = null) {
         }
     } catch (error) {
         if (!isCurrentView(viewId)) return;
-        content.textContent = "";
-        message.textContent = error.message;
+        elements.content.textContent = "";
+        elements.message.textContent = error.message;
         return;
     }
 
     if (!isCurrentView(viewId)) return;
-    content.innerHTML = `
+    elements.content.innerHTML = `
         <h2>${isEdit ? t("Խմբագրել ապրանքը") : t("Ավելացնել ապրանք")}</h2>
 
         <form id="product-form">
@@ -264,7 +277,7 @@ async function showProductForm(productId = null) {
             return;
         }
         if (file.size > 2 * 1024 * 1024) {
-            message.textContent = t("Նկարի առավելագույն չափը 2 ՄԲ է։");
+            elements.message.textContent = t("Նկարի առավելագույն չափը 2 ՄԲ է։");
             return;
         }
         const reader = new FileReader();
@@ -307,7 +320,7 @@ async function showProductForm(productId = null) {
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        message.textContent = "";
+        elements.message.textContent = "";
         saveButton.disabled = true;
 
         const data = new FormData(form);
@@ -316,7 +329,7 @@ async function showProductForm(productId = null) {
         if (!file) {
             data.delete("image");
         } else if (file.size > 2 * 1024 * 1024) {
-            message.textContent = t("Նկարի առավելագույն չափը 2 ՄԲ է։");
+            elements.message.textContent = t("Նկարի առավելագույն չափը 2 ՄԲ է։");
             saveButton.disabled = false;
             return;
         }
@@ -331,7 +344,7 @@ async function showProductForm(productId = null) {
             await request(url, "POST", data);
         } catch (error) {
             if (!isCurrentView(viewId)) return;
-            message.textContent = error.message;
+            elements.message.textContent = error.message;
             saveButton.disabled = false;
             return;
         }
@@ -348,8 +361,8 @@ async function showProductForm(productId = null) {
 
 async function showProduct(id) {
     const viewId = beginView("detail");
-    message.textContent = "";
-    content.textContent = t("Բեռնվում է...");
+    elements.message.textContent = "";
+    elements.content.textContent = t("Բեռնվում է...");
 
     try {
         const result = await request("/products/" + id);
@@ -357,7 +370,7 @@ async function showProduct(id) {
         const product = result.product;
 
         if (!isCurrentView(viewId)) return;
-        content.innerHTML = `
+        elements.content.innerHTML = `
             <article class="product-card">
                 <h2 id="product-title"></h2>
                 <p id="product-description" class="product-description"></p>
@@ -374,7 +387,7 @@ async function showProduct(id) {
         document.getElementById("product-title").textContent = product.name;
 
         if (product.image_url) {
-            content
+            elements.content
                 .querySelector(".product-card")
                 .prepend(createProductImage(product));
         }
@@ -433,26 +446,26 @@ async function showProduct(id) {
         }
     } catch (error) {
         if (!isCurrentView(viewId)) return;
-        content.textContent = "";
-        message.textContent = error.message;
+        elements.content.textContent = "";
+        elements.message.textContent = error.message;
     }
 }
 
 async function deleteProduct(id, button) {
-    const viewId = viewVersion;
+    const viewId = state.viewVersion;
     const confirmed = window.confirm(t("Ցանկանո՞ւմ ես ջնջել այս ապրանքը։"));
 
     if (!confirmed) {
         return;
     }
 
-    message.textContent = "";
+    elements.message.textContent = "";
     button.disabled = true;
 
     try {
         await request("/products/" + id, "DELETE");
     } catch (error) {
-        if (isCurrentView(viewId)) message.textContent = error.message;
+        if (isCurrentView(viewId)) elements.message.textContent = error.message;
         button.disabled = false;
         return;
     }

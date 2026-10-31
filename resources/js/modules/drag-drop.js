@@ -1,3 +1,9 @@
+import { elements, state } from "./state.js";
+import { showProducts } from "./products.js";
+import { isCurrentView, request } from "./common.js";
+import { loadMenu, selectCategory } from "./menu.js";
+import { t } from "./language.js";
+
 let draggedItem = null;
 let dragBusy = false;
 
@@ -7,7 +13,7 @@ function clearDropHighlights() {
     });
 }
 
-function createDragHandle(kind, id) {
+export function createDragHandle(kind, id) {
     const handle = document.createElement("button");
 
     handle.type = "button";
@@ -72,29 +78,30 @@ function addDropZone(element, canAccept, onDrop) {
         event.stopPropagation();
 
         const item = draggedItem;
-        const viewId = viewVersion;
+        const viewId = state.viewVersion;
 
         draggedItem = null;
         dragBusy = true;
 
         clearDropHighlights();
-        message.textContent = "";
+        elements.message.textContent = "";
 
         try {
             await onDrop(item);
         } catch (error) {
-            if (isCurrentView(viewId)) message.textContent = error.message;
+            if (isCurrentView(viewId))
+                elements.message.textContent = error.message;
         } finally {
             dragBusy = false;
         }
     });
 }
 
-function enableProductDrag(card, product, page) {
+export function enableProductDrag(card, product, page) {
     const canMove =
-        currentUser &&
-        (currentUser.role === "admin" ||
-            Number(currentUser.id) === Number(product.user_id));
+        state.currentUser &&
+        (state.currentUser.role === "admin" ||
+            Number(state.currentUser.id) === Number(product.user_id));
 
     if (canMove) {
         card.prepend(createDragHandle("product", product.id));
@@ -104,14 +111,14 @@ function enableProductDrag(card, product, page) {
         card,
         function (item) {
             return (
-                currentUser &&
-                currentUser.role === "admin" &&
+                state.currentUser &&
+                state.currentUser.role === "admin" &&
                 item.kind === "product" &&
                 item.id !== Number(product.id)
             );
         },
         async function (item) {
-            const viewId = viewVersion;
+            const viewId = state.viewVersion;
             await request("/products/" + item.id + "/position", "PATCH", {
                 before_id: product.id,
             });
@@ -121,11 +128,11 @@ function enableProductDrag(card, product, page) {
     );
 }
 
-function enableCategoryDrop(button, categoryId) {
+export function enableCategoryDrop(button, categoryId) {
     addDropZone(
         button,
         function (item) {
-            if (!currentUser) {
+            if (!state.currentUser) {
                 return false;
             }
 
@@ -135,12 +142,12 @@ function enableCategoryDrop(button, categoryId) {
 
             return (
                 item.kind === "menu" &&
-                currentUser.role === "admin" &&
+                state.currentUser.role === "admin" &&
                 item.id !== categoryId
             );
         },
         async function (item) {
-            const viewId = viewVersion;
+            const viewId = state.viewVersion;
             if (item.kind === "product") {
                 await request("/products/" + item.id + "/category", "PATCH", {
                     category_id: categoryId,
@@ -150,7 +157,7 @@ function enableCategoryDrop(button, categoryId) {
                 return;
             }
 
-            const menuItem = menuItems.find(function (candidate) {
+            const menuItem = state.menuItems.find(function (candidate) {
                 return Number(candidate.id) === item.id;
             });
 

@@ -1,13 +1,21 @@
-// Entry point: the feature functions live in separate files.
+import { elements, state } from "./state.js";
+import { resetSearch } from "./search.js";
+import { showProducts, showProductForm } from "./products.js";
+import { beginView, isCurrentView, request } from "./common.js";
+import { loadMenu, selectCategory, showMenuAdmin } from "./menu.js";
+import { showForm, logout } from "./auth.js";
+import { t, setupLanguageButtons } from "./language.js";
+import "./contact.js";
+
 async function start() {
     const viewId = beginView("loading");
-    content.textContent = t("Բեռնվում է...");
+    elements.content.textContent = t("Բեռնվում է...");
     try {
         const result = await request("/auth/user");
         if (!isCurrentView(viewId)) return;
-        currentUser = result.user;
+        state.currentUser = result.user;
 
-        navigation.innerHTML = `
+        elements.navigation.innerHTML = `
             <button id="products-button">${t("Բոլորը")}</button>
         `;
 
@@ -18,10 +26,10 @@ async function start() {
                 selectCategory(null);
             });
 
-        if (currentUser) {
+        if (state.currentUser) {
             const greeting = document.createElement("span");
             greeting.className = "user-greeting";
-            greeting.textContent = t("Բարև, ") + currentUser.name;
+            greeting.textContent = t("Բարև, ") + state.currentUser.name;
 
             const addButton = document.createElement("button");
             addButton.className = "primary-button";
@@ -35,9 +43,9 @@ async function start() {
             logoutButton.textContent = t("Ելք");
             logoutButton.addEventListener("click", logout);
 
-            navigation.append(greeting, addButton, logoutButton);
+            elements.navigation.append(greeting, addButton, logoutButton);
 
-            if (currentUser.role === "admin") {
+            if (state.currentUser.role === "admin") {
                 const menuButton = document.createElement("button");
                 menuButton.textContent = t("Մենյուի կառավարում");
 
@@ -45,7 +53,7 @@ async function start() {
                     showMenuAdmin();
                 });
 
-                navigation.append(menuButton);
+                elements.navigation.append(menuButton);
             }
         } else {
             const loginButton = document.createElement("button");
@@ -62,15 +70,15 @@ async function start() {
                 showForm("register");
             });
 
-            navigation.append(loginButton, registerButton);
+            elements.navigation.append(loginButton, registerButton);
         }
 
         await loadMenu();
         if (isCurrentView(viewId)) await showProducts();
     } catch (error) {
         if (!isCurrentView(viewId)) return;
-        content.textContent = "";
-        message.textContent = error.message;
+        elements.content.textContent = "";
+        elements.message.textContent = error.message;
     }
 }
 

@@ -4,7 +4,7 @@ try {
         currentLanguage = "en";
 } catch {}
 
-function t(text) {
+export function t(text) {
     if (currentLanguage === "hy") {
         return text;
     }
@@ -14,7 +14,7 @@ function t(text) {
         : text;
 }
 
-function setupLanguageButtons() {
+export function setupLanguageButtons(onLanguageChange) {
     document.documentElement.lang = currentLanguage;
     document.querySelectorAll("[data-i18n]").forEach((el) => {
         el.textContent = t(el.dataset.i18n);
@@ -66,8 +66,8 @@ function setupLanguageButtons() {
                 localStorage.setItem("intership_language", language.code);
             } catch {
                 currentLanguage = language.code;
-                setupLanguageButtons();
-                start();
+                setupLanguageButtons(onLanguageChange);
+                onLanguageChange();
                 return;
             }
 

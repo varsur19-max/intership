@@ -1,1 +1,1 @@
-//
+import "./modules/app.js";

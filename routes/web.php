@@ -24,8 +24,6 @@ Route::post('/contact', [ContactController::class, 'send'])
 
 Route::get('/products', [ProductController::class, 'index']);
 
-// Route::get('/categories', [ProductController::class, 'categories']);
-
 Route::post('/products', [ProductController::class, 'store'])
     ->middleware('auth');
 

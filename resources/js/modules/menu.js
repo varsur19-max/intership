@@ -1,5 +1,11 @@
-// Display full category paths when different branches share a name.
-function categoryOptions(items) {
+import { elements, state } from "./state.js";
+import { resetSearch } from "./search.js";
+import { showProducts } from "./products.js";
+import { beginView, isCurrentView, request } from "./common.js";
+import { t } from "./language.js";
+import { createDragHandle, enableCategoryDrop } from "./drag-drop.js";
+
+export function categoryOptions(items) {
     const byId = new Map(items.map((item) => [Number(item.id), item]));
     return items.map((item) => {
         const labels = [item.title];
@@ -15,17 +21,19 @@ function categoryOptions(items) {
 }
 
 let menuRequestVersion = 0;
-async function loadMenu() {
+export async function loadMenu() {
     const version = ++menuRequestVersion;
     const items = await request("/menu-items");
     if (version !== menuRequestVersion) return;
-    menuItems = items;
+    state.menuItems = items;
 
     if (
-        selectedCategory !== null &&
-        !menuItems.some((item) => Number(item.id) === selectedCategory)
+        state.selectedCategory !== null &&
+        !state.menuItems.some(
+            (item) => Number(item.id) === state.selectedCategory,
+        )
     ) {
-        selectedCategory = null;
+        state.selectedCategory = null;
     }
 
     renderMenu();
@@ -38,7 +46,7 @@ function renderMenu() {
     const allButton = document.createElement("button");
     allButton.textContent = t("Բոլորը");
 
-    if (selectedCategory === null) {
+    if (state.selectedCategory === null) {
         allButton.className = "active";
     }
 
@@ -55,7 +63,7 @@ function renderMenu() {
     function buildLevel(parentId) {
         const list = document.createElement("ul");
 
-        menuItems
+        state.menuItems
             .filter((item) => item.parent_id == parentId)
             .forEach(function (item) {
                 if (visited.has(Number(item.id))) return;
@@ -65,7 +73,7 @@ function renderMenu() {
 
                 button.textContent = item.title;
 
-                if (Number(item.id) === selectedCategory) {
+                if (Number(item.id) === state.selectedCategory) {
                     button.className = "active";
                 }
 
@@ -80,7 +88,7 @@ function renderMenu() {
 
                 enableCategoryDrop(button, Number(item.id));
 
-                if (currentUser && currentUser.role === "admin") {
+                if (state.currentUser && state.currentUser.role === "admin") {
                     line.append(createDragHandle("menu", item.id));
                 }
 
@@ -101,28 +109,30 @@ function renderMenu() {
     container.append(buildLevel(null));
 }
 
-async function selectCategory(id) {
-    selectedCategory = id;
+export async function selectCategory(id) {
+    state.selectedCategory = id;
     renderMenu();
     await showProducts(1);
 }
 
-async function showMenuAdmin(editId = null) {
+export async function showMenuAdmin(editId = null) {
     const viewId = beginView("admin");
-    if (!currentUser || currentUser.role !== "admin") {
-        message.textContent = t("Այս բաժինը միայն ադմինիստրատորի համար է։");
+    if (!state.currentUser || state.currentUser.role !== "admin") {
+        elements.message.textContent = t(
+            "Այս բաժինը միայն ադմինիստրատորի համար է։",
+        );
         return;
     }
 
-    message.textContent = "";
-    content.textContent = t("Բեռնվում է...");
+    elements.message.textContent = "";
+    elements.content.textContent = t("Բեռնվում է...");
 
     try {
         await loadMenu();
     } catch (error) {
         if (!isCurrentView(viewId)) return;
-        content.textContent = "";
-        message.textContent = error.message;
+        elements.content.textContent = "";
+        elements.message.textContent = error.message;
         return;
     }
 
@@ -130,16 +140,18 @@ async function showMenuAdmin(editId = null) {
     const editing =
         editId === null
             ? null
-            : menuItems.find((item) => Number(item.id) === Number(editId));
+            : state.menuItems.find(
+                  (item) => Number(item.id) === Number(editId),
+              );
 
     if (editId !== null && !editing) {
-        content.textContent = "";
-        message.textContent = t("Կատեգորիան այլևս գոյություն չունի։");
+        elements.content.textContent = "";
+        elements.message.textContent = t("Կատեգորիան այլևս գոյություն չունի։");
         return;
     }
 
     if (!isCurrentView(viewId)) return;
-    content.innerHTML = `
+    elements.content.innerHTML = `
         <h2>${t("Մենյուի կառավարում")}</h2>
 
         <form id="menu-form">
@@ -197,7 +209,7 @@ async function showMenuAdmin(editId = null) {
 
         excluded.add(numberId);
 
-        menuItems
+        state.menuItems
             .filter((item) => Number(item.parent_id) === numberId)
             .forEach((item) => excludeBranch(item.id));
     }
@@ -208,7 +220,7 @@ async function showMenuAdmin(editId = null) {
 
     const visited = new Set();
     function addParentOptions(parentId, prefix = "") {
-        menuItems
+        state.menuItems
             .filter((item) => item.parent_id == parentId)
             .forEach(function (item) {
                 if (
@@ -243,15 +255,15 @@ async function showMenuAdmin(editId = null) {
             showMenuAdmin();
         });
 
-    if (menuItems.length === 0) {
+    if (state.menuItems.length === 0) {
         list.textContent = t("Կատեգորիաներ դեռ չկան։");
     }
 
-    menuItems.forEach(function (item) {
+    state.menuItems.forEach(function (item) {
         const row = document.createElement("div");
         row.className = "menu-row";
 
-        const parent = menuItems.find(
+        const parent = state.menuItems.find(
             (candidate) => Number(candidate.id) === Number(item.parent_id),
         );
 
@@ -285,7 +297,7 @@ async function showMenuAdmin(editId = null) {
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        message.textContent = "";
+        elements.message.textContent = "";
         saveButton.disabled = true;
 
         const data = Object.fromEntries(new FormData(form));
@@ -302,7 +314,7 @@ async function showMenuAdmin(editId = null) {
             await request(url, method, data);
         } catch (error) {
             if (!isCurrentView(viewId)) return;
-            message.textContent = error.message;
+            elements.message.textContent = error.message;
             saveButton.disabled = false;
             return;
         }
@@ -312,7 +324,7 @@ async function showMenuAdmin(editId = null) {
 }
 
 async function deleteMenuItem(id, button) {
-    const viewId = viewVersion;
+    const viewId = state.viewVersion;
     const confirmed = window.confirm(
         t(
             "Ջնջե՞լ կատեգորիան։ Դրա ապրանքները կմնան առանց կատեգորիայի, " +
@@ -324,13 +336,13 @@ async function deleteMenuItem(id, button) {
         return;
     }
 
-    message.textContent = "";
+    elements.message.textContent = "";
     button.disabled = true;
 
     try {
         await request("/menu-items/" + id, "DELETE");
     } catch (error) {
-        if (isCurrentView(viewId)) message.textContent = error.message;
+        if (isCurrentView(viewId)) elements.message.textContent = error.message;
         button.disabled = false;
         return;
     }

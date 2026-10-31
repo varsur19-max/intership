@@ -1,7 +1,11 @@
+import { elements, state } from "./state.js";
+import { request } from "./common.js";
+import { t } from "./language.js";
+
 function openContactModal() {
-    if (!currentUser) {
-        message.textContent = t("Նամակ գրելու համար մուտք գործիր։");
-        message.scrollIntoView({ behavior: "smooth" });
+    if (!state.currentUser) {
+        elements.message.textContent = t("Նամակ գրելու համար մուտք գործիր։");
+        elements.message.scrollIntoView({ behavior: "smooth" });
         return;
     }
 
@@ -60,8 +64,8 @@ function openContactModal() {
             );
 
             closeModal();
-            message.textContent = result.message;
-            message.scrollIntoView({ behavior: "smooth"});
+            elements.message.textContent = result.message;
+            elements.message.scrollIntoView({ behavior: "smooth"});
         }catch(err) {
             error.textContent = err.message;
             button.disabled = false

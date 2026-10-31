@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\MenuItem;
 use App\Models\Product;
-use Illuminate\Auth\Events\Failed;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -235,15 +234,6 @@ class ProductController extends Controller
             'message' => 'Ապրանքը տեղափոխվեց։',
         ]);
     }
-
-    // public function categories(): JsonResponse
-    // {
-    //     $categories = MenuItem::orderBy('sort_order')
-    //         ->orderBy('id')
-    //         ->get(['id', 'title']);
-
-    //     return response()->json($categories);
-    // }
 
     public function store(StoreProductRequest $request): JsonResponse
     {

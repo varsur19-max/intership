@@ -1,3 +1,7 @@
+import { state } from "./state.js";
+import { showProducts } from "./products.js";
+import { t } from "./language.js";
+
 const searchForm = document.getElementById("search-form");
 const searchInput = document.getElementById("search-input");
 const suggestionsBox = document.getElementById("search-suggestions");
@@ -7,11 +11,11 @@ searchInput.placeholder = t("Որոնել ապրանք...");
 searchForm.addEventListener("submit", function (event) {
     event.preventDefault();
 
-    searchQuery = searchInput.value.trim();
+    state.searchQuery = searchInput.value.trim();
     showProducts(1);
 });
 
-function renderSuggestions(names) {
+export function renderSuggestions(names) {
     suggestionsBox.textContent = "";
     suggestionsBox.hidden = names.length === 0;
 
@@ -28,7 +32,7 @@ function renderSuggestions(names) {
 
         button.addEventListener("click", function () {
             searchInput.value = name;
-            searchQuery = name;
+            state.searchQuery = name;
             showProducts(1);
         });
 
@@ -36,12 +40,12 @@ function renderSuggestions(names) {
     });
 }
 
-function hideSuggestions() {
+export function hideSuggestions() {
     renderSuggestions([]);
 }
 
-function resetSearch() {
+export function resetSearch() {
     searchInput.value = "";
-    searchQuery = "";
+    state.searchQuery = "";
     hideSuggestions();
 }

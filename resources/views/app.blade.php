@@ -8,15 +8,18 @@
     <meta name="theme-color" content="#173f35">
     <title>Intership · Catalog</title>
     <link rel="icon" href="data:,">
+    {{--
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v={{ filemtime(public_path('css/app.css')) }}">
+    --}}
     <script>
-        const englishTranslations = {{ Illuminate\Support\Js::from(json_decode(file_get_contents(lang_path('en.json')), true, 512, JSON_THROW_ON_ERROR)) }};
+        window.englishTranslations = {{ Illuminate\Support\Js::from(json_decode(file_get_contents(lang_path('en.json')), true, 512, JSON_THROW_ON_ERROR)) }};
     </script>
-    @vite(['resources/js/app.js'])
-    @foreach (['language', 'common', 'drag-drop', 'auth', 'contact', 'products', 'menu', 'search', 'app'] as $script)
-        <script src="{{ asset('js/' . $script . '.js') }}?v={{ filemtime(public_path('js/' . $script . '.js')) }}"
-            defer></script>
-    @endforeach
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    {{--@foreach (['language', 'common', 'drag-drop', 'auth', 'contact', 'products', 'menu', 'search', 'app'] as
+    $script)
+    <script src="{{ asset('js/' . $script . '.js') }}?v={{ filemtime(public_path('js/' . $script . '.js')) }}"
+        defer></script>
+    @endforeach--}}
 </head>
 
 <body>

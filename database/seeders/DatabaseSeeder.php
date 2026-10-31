@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -18,16 +17,6 @@ class DatabaseSeeder extends Seeder
         if (!app()->environment(['local', 'testing'])) {
             return;
         }
-
-        if (User::where('email', 'test@example.com')->exists()) {
-            return;
-        }
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'username' => 'test_user',
-            'email' => 'test@example.com',
-        ]);
 
         $this->call([
             ProductSeeder::class,

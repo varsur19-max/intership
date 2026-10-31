@@ -1,26 +1,19 @@
-const navigation = document.getElementById("navigation");
-const content = document.getElementById("content");
-const message = document.getElementById("message");
-let currentUser = null;
-let menuItems = [];
-let selectedCategory = null;
-let searchQuery = "";
+import { elements, state } from "./state.js";
+import { hideSuggestions } from "./search.js";
+import { t } from "./language.js";
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-// A view token prevents old requests from replacing a newer screen.
-let viewVersion = 0;
-let currentPage = 1;
-function beginView(name) {
-    content.dataset.view = name;
-    message.textContent = "";
+export function beginView(name) {
+    elements.content.dataset.view = name;
+    elements.message.textContent = "";
     hideSuggestions();
-    return ++viewVersion;
+    return ++state.viewVersion;
 }
-function isCurrentView(version) {
-    return version === viewVersion;
+export function isCurrentView(version) {
+    return version === state.viewVersion;
 }
-function productPlaceholder() {
+export function productPlaceholder() {
     const box = document.createElement("div");
     box.className = "image-placeholder";
     box.setAttribute("aria-label", t("Նկար չկա"));
@@ -28,7 +21,7 @@ function productPlaceholder() {
         '<svg viewBox="0 0 64 64" fill="none" aria-hidden="true"><path d="m32 7 23 13v25L32 58 9 45V20L32 7Z" stroke="currentColor" stroke-width="2"/><path d="m9 20 23 13 23-13M32 33v25M21 14l23 13" stroke="currentColor" stroke-width="2"/></svg>';
     return box;
 }
-async function request(url, method = "GET", data = null) {
+export async function request(url, method = "GET", data = null) {
     const options = {
         method,
         credentials: "same-origin",

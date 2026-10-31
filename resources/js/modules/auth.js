@@ -1,12 +1,16 @@
-function showForm(type) {
+import { elements } from "./state.js";
+import { beginView, isCurrentView, request } from "./common.js";
+import { t } from "./language.js";
+
+export function showForm(type) {
     const viewId = beginView("auth");
-    message.textContent = "";
+    elements.message.textContent = "";
 
     const isRegister = type === "register";
     const title = isRegister ? t("Գրանցում") : t("Մուտք");
 
     if (!isCurrentView(viewId)) return;
-    content.innerHTML = `
+    elements.content.innerHTML = `
         <h2>${title}</h2>
 
         <form id="auth-form">
@@ -84,7 +88,7 @@ function showForm(type) {
     form.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        message.textContent = "";
+        elements.message.textContent = "";
 
         const button = form.querySelector("button");
         button.disabled = true;
@@ -97,15 +101,16 @@ function showForm(type) {
             window.location.reload();
         } catch (error) {
             if (!isCurrentView(viewId)) return;
-            message.textContent = error.message;
+            elements.message.textContent = error.message;
         } finally {
             button.disabled = false;
         }
     });
 }
 
-async function logout() {
-    message.textContent = "";
+
+export async function logout() {
+    elements.message.textContent = "";
 
     const button = document.getElementById("logout-button");
     button.disabled = true;
@@ -115,7 +120,7 @@ async function logout() {
 
         window.location.reload();
     } catch (error) {
-        message.textContent = error.message;
+        elements.message.textContent = error.message;
         button.disabled = false;
     }
 }
