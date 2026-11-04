@@ -86,7 +86,7 @@ class MenuItemController extends Controller
 
                 $parent = $items->get($parentId);
 
-                if (! $parent) {
+                if (!$parent) {
                     throw ValidationException::withMessages([
                         'parent_id' => 'Ծնող կատեգորիան գոյություն չունի։',
                     ]);
