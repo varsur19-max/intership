@@ -8,9 +8,6 @@
     <meta name="theme-color" content="#173f35">
     <title>Intership · Catalog</title>
     <link rel="icon" href="data:,">
-    <script>
-        window.englishTranslations = {{ Illuminate\Support\Js::from(json_decode(file_get_contents(lang_path('en.json')), true, 512, JSON_THROW_ON_ERROR)) }};
-    </script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 

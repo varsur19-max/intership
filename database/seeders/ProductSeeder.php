@@ -28,7 +28,7 @@ class ProductSeeder extends Seeder
                 'name' => 'user',
                 'username' => 'user',
                 'password' => Hash::make('user'),
-                'role' => 'user'
+                'role' => 'user',
             ]
         );
 

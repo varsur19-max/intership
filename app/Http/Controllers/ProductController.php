@@ -2,24 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 use App\Models\MenuItem;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
 
 class ProductController extends Controller
 {
     public function reorder(Request $request, Product $product): JsonResponse
     {
-        abort_unless(
-            $request->user()?->isAdmin(),
-            403,
-            'Հերթականությունը կարող է փոխել միայն ադմինիստրատորը։'
-        );
 
         $data = $request->validate([
             'before_id' => ['required', 'integer', 'exists:products,id'],
@@ -35,16 +30,12 @@ class ProductController extends Controller
         }
 
         DB::transaction(function () use ($movingId, $beforeId) {
-            $products = Product::orderBy('sort_order')
+            $current = Product::orderBy('sort_order')
                 ->orderByDesc('id')
                 ->lockForUpdate()
-                ->get(['id', 'sort_order']);
+                ->pluck('sort_order', 'id');
 
-            $ids = [];
-
-            foreach ($products as $item) {
-                $ids[] = (int) $item->id;
-            }
+            $ids = $current->keys()->map(fn ($id) => (int) $id)->all();
 
             abort_unless(
                 in_array($movingId, $ids, true)
@@ -62,11 +53,11 @@ class ProductController extends Controller
             array_splice($ids, $newPosition, 0, [$movingId]);
 
             foreach ($ids as $position => $id) {
-                DB::table('products')
-                    ->where('id', $id)
-                    ->update([
-                        'sort_order' => $position + 1,
-                    ]);
+                $newOrder = $position + 1;
+
+                if ((int) $current[$id] !== $newOrder) {
+                    DB::table('products')->where('id', $id)->update(['sort_order' => $newOrder]);
+                }
             }
         }, 3);
 
@@ -104,7 +95,7 @@ class ProductController extends Controller
             $query->where(
                 'name',
                 'like',
-                '%' . $this->escapeLike($data['search']) . '%'
+                '%'.$this->escapeLike($data['search']).'%'
             );
         }
 
@@ -138,7 +129,7 @@ class ProductController extends Controller
             $current = array_shift($queue);
 
             foreach ($childrenByParent->get($current, []) as $child) {
-                if (!in_array($child->id, $ids, true)) {
+                if (! in_array($child->id, $ids, true)) {
                     $ids[] = $child->id;
                     $queue[] = $child->id;
                 }
@@ -156,7 +147,7 @@ class ProductController extends Controller
             $result = '';
 
             foreach (mb_str_split($text) as $char) {
-                if (!isset($map[$char])) {
+                if (! isset($map[$char])) {
                     $map[$char] = chr(count($map));
                 }
 
@@ -176,7 +167,7 @@ class ProductController extends Controller
         $candidates = array_merge([$name], preg_split('/\s+/u', $name));
 
         return min(array_map(
-            fn(string $candidate) => $this->mbLevenshtein($needle, $candidate),
+            fn (string $candidate) => $this->mbLevenshtein($needle, $candidate),
             $candidates
         ));
     }
@@ -192,13 +183,13 @@ class ProductController extends Controller
             $query->whereIn('category_id', $categoryIds);
         }
 
-        return $query->pluck('name')
+        return $query->limit(500)->pluck('name')
             ->unique()
-            ->map(fn(string $name) => [
+            ->map(fn (string $name) => [
                 'name' => $name,
                 'distance' => $this->distanceToName($needle, $name),
             ])
-            ->filter(fn(array $item) => $item['distance'] <= $maxDistance)
+            ->filter(fn (array $item) => $item['distance'] <= $maxDistance)
             ->sortBy('distance')
             ->take(5)
             ->pluck('name')
@@ -209,7 +200,7 @@ class ProductController extends Controller
     public function moveToCategory(Request $request, Product $product): JsonResponse
     {
         abort_unless(
-            $this->canManage($request, $product),
+            $product->isManagedBy($request->user()),
             403,
             'Դու իրավունք չունես տեղափոխելու այս ապրանքը։'
         );
@@ -237,9 +228,7 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): JsonResponse
     {
-        $data = $request->validated();
-
-        unset($data['image']);
+        $data = $request->safe()->except('image');
 
         $imagePath = null;
 
@@ -280,15 +269,13 @@ class ProductController extends Controller
 
         return response()->json([
             'product' => $product,
-            'can_manage' => $this->canManage($request, $product),
+            'can_manage' => $product->isManagedBy($request->user()),
         ]);
     }
 
     public function update(UpdateProductRequest $request, Product $product): JsonResponse
     {
-        $data = $request->validated();
-
-        unset($data['image']);
+        $data = $request->safe()->except('image');
 
         $oldImage = null;
         $newImage = null;
@@ -322,7 +309,7 @@ class ProductController extends Controller
 
         if ($newImage && $oldImage) {
             try {
-                if (!Storage::disk('public')->delete($oldImage)) {
+                if (! Storage::disk('public')->delete($oldImage)) {
                     report(new \RuntimeException('Could not remove replaced product image.'));
                 }
             } catch (\Throwable $error) {
@@ -338,7 +325,7 @@ class ProductController extends Controller
     public function destroy(Request $request, Product $product): JsonResponse
     {
         abort_unless(
-            $this->canManage($request, $product),
+            $product->isManagedBy($request->user()),
             403,
             'Դու իրավունք չունես ջնջելու այս ապրանքը։'
         );
@@ -348,17 +335,5 @@ class ProductController extends Controller
         return response()->json([
             'message' => 'Ապրանքը ջնջվեց։',
         ]);
-    }
-
-    private function canManage(Request $request, Product $product): bool
-    {
-        $user = $request->user();
-
-        if (!$user) {
-            return false;
-        }
-
-        return (int) $product->user_id === (int) $user->id
-            || $user->isAdmin();
     }
 }

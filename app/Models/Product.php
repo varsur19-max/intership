@@ -43,8 +43,13 @@ class Product extends Model
     public function getImageUrlAttribute(): ?string
     {
         return $this->image
-            ? asset('storage/' . $this->image)
+            ? asset('storage/'.$this->image)
             : null;
     }
 
+    public function isManagedBy(?User $user): bool
+    {
+        return $user !== null
+            && ((int) $this->user_id === (int) $user->id || $user->isAdmin());
+    }
 }

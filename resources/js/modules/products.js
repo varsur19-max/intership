@@ -4,17 +4,16 @@ import {
     beginView,
     isCurrentView,
     productPlaceholder,
+    confirmAndDelete,
     request,
 } from "./common.js";
 import { categoryOptions, selectCategory } from "./menu.js";
 import { showForm } from "./auth.js";
 import { t } from "./language.js";
 import { enableProductDrag } from "./drag-drop.js";
-
 export async function showProducts(page = state.currentPage) {
     const viewId = beginView("catalog");
     elements.message.textContent = "";
-    if (!isCurrentView(viewId)) return;
     elements.content.innerHTML = `
         <div class="section-heading"><div><p class="eyebrow">${t("ՔՈ ԿԱՏԱԼՈԳԸ")}</p><h2>${t("Ապրանքներ")}</h2></div><span id="catalog-count" class="count-pill"></span></div>
         <div id="products-list">${t("Բեռնվում է...")}</div>
@@ -75,29 +74,9 @@ export async function showProducts(page = state.currentPage) {
             description.className = "product-description";
             description.textContent = product.description;
 
-            const price = document.createElement("p");
-            price.className = "product-price";
-            price.textContent = t("Գին՝ ") + product.price + t(" դրամ");
+            card.append(title, description, ...productDetails(product));
 
-            const stock = document.createElement("p");
-            stock.className = "product-meta";
-            stock.textContent = t("Քանակ՝ ") + product.stock;
-
-            const author = document.createElement("p");
-            author.className = "product-meta";
-            author.textContent =
-                t("Հեղինակ՝ ") +
-                (product.user ? product.user.name : t("Անհայտ"));
-
-            const category = document.createElement("p");
-            category.className = "product-category";
-            category.textContent =
-                t("Կատեգորիա՝ ") +
-                (product.category
-                    ? product.category.title
-                    : t("Առանց կատեգորիայի"));
-
-            card.append(title, description, price, stock, author, category);
+            // card.append(title, description, price, stock, author, category);
 
             const viewButton = document.createElement("button");
             viewButton.className = "view-button";
@@ -165,7 +144,7 @@ export async function showProductForm(productId = null) {
     let categories;
 
     try {
-        categories = await request("/menu-items");
+        categories = state.menuItems;
 
         if (isEdit) {
             const result = await request("/products/" + productId);
@@ -369,15 +348,10 @@ async function showProduct(id) {
         if (!isCurrentView(viewId)) return;
         const product = result.product;
 
-        if (!isCurrentView(viewId)) return;
         elements.content.innerHTML = `
             <article class="product-card">
                 <h2 id="product-title"></h2>
                 <p id="product-description" class="product-description"></p>
-                <p id="product-price"></p>
-                <p id="product-stock"></p>
-                <p id="product-author"></p>
-                <p id="product-category"></p>
                 <p id="product-modified"></p>
 
                 <div id="product-actions"></div>
@@ -395,21 +369,9 @@ async function showProduct(id) {
         document.getElementById("product-description").textContent =
             product.description;
 
-        document.getElementById("product-price").textContent =
-            t("Գին՝ ") + product.price + t(" դրամ");
-
-        document.getElementById("product-stock").textContent =
-            t("Քանակ՝ ") + product.stock;
-
-        document.getElementById("product-author").textContent =
-            t("Հեղինակ՝ ") + (product.user ? product.user.name : t("Անհայտ"));
-
-        document.getElementById("product-category").textContent =
-            t("Կատեգորիա՝ ") +
-            (product.category
-                ? product.category.title
-                : t("Առանց կատեգորիայի"));
-
+        document
+            .getElementById("product-description")
+            .after(...productDetails(product));
         if (product.updated_at !== product.created_at) {
             document.getElementById("product-modified").textContent =
                 t("Փոփոխված");
@@ -438,9 +400,13 @@ async function showProduct(id) {
             deleteButton.textContent = t("Ջնջել");
 
             deleteButton.addEventListener("click", function () {
-                deleteProduct(product.id, deleteButton);
+                confirmAndDelete({
+                    url: "/products/" + product.id,
+                    question: t("Ցանկանո՞ւմ ես ջնջել այս ապրանքը։"),
+                    button: deleteButton,
+                    refresh: showProducts,
+                });
             });
-
             deleteButton.className = "danger-button";
             actions.append(editButton, deleteButton);
         }
@@ -449,28 +415,6 @@ async function showProduct(id) {
         elements.content.textContent = "";
         elements.message.textContent = error.message;
     }
-}
-
-async function deleteProduct(id, button) {
-    const viewId = state.viewVersion;
-    const confirmed = window.confirm(t("Ցանկանո՞ւմ ես ջնջել այս ապրանքը։"));
-
-    if (!confirmed) {
-        return;
-    }
-
-    elements.message.textContent = "";
-    button.disabled = true;
-
-    try {
-        await request("/products/" + id, "DELETE");
-    } catch (error) {
-        if (isCurrentView(viewId)) elements.message.textContent = error.message;
-        button.disabled = false;
-        return;
-    }
-
-    if (isCurrentView(viewId)) await showProducts();
 }
 
 function createProductImage(product) {
@@ -489,4 +433,24 @@ function createProductImage(product) {
     );
 
     return image;
+}
+
+function productDetails(product) {
+    const rows = [
+        ["product-price", t("Գին՝ ") + product.price + t(" դրամ")],
+        ["product-meta", t("Քանակ՝ ") + product.stock],
+        ["product-meta", t("Հեղինակ՝ ") + (product.user?.name ?? t("անհայտ"))],
+        [
+            "product-category",
+            t("Կատեգորիա՝ ") +
+                (product.category?.title ?? t("Առանց կատեգորիայի")),
+        ],
+    ];
+
+    return rows.map(([className, text]) => {
+        const p = document.createElement("p");
+        p.className = className;
+        p.textContent = text;
+        return p;
+    });
 }

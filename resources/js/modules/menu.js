@@ -1,7 +1,12 @@
 import { elements, state } from "./state.js";
 import { resetSearch } from "./search.js";
 import { showProducts } from "./products.js";
-import { beginView, isCurrentView, request } from "./common.js";
+import {
+    beginView,
+    confirmAndDelete,
+    isCurrentView,
+    request,
+} from "./common.js";
 import { t } from "./language.js";
 import { createDragHandle, enableCategoryDrop } from "./drag-drop.js";
 
@@ -40,7 +45,7 @@ export async function loadMenu() {
 }
 
 function renderMenu() {
-    const container = document.getElementById("category-menu");
+    const container = elements.categoryMenu;
     container.textContent = "";
 
     const allButton = document.createElement("button");
@@ -150,7 +155,6 @@ export async function showMenuAdmin(editId = null) {
         return;
     }
 
-    if (!isCurrentView(viewId)) return;
     elements.content.innerHTML = `
         <h2>${t("Մենյուի կառավարում")}</h2>
 
@@ -287,7 +291,15 @@ export async function showMenuAdmin(editId = null) {
         deleteButton.textContent = t("Ջնջել");
 
         deleteButton.addEventListener("click", function () {
-            deleteMenuItem(item.id, deleteButton);
+            confirmAndDelete({
+                url: "/menu-items/" + item.id,
+                question: t(
+                    "Ջնջե՞լ կատեգորիան։ Դրա ապրանքները կմնան առանց կատեգորիայի, " +
+                        "իսկ անմիջական ենթակետերը կդառնան հիմնական կատեգորիաներ։",
+                ),
+                button: deleteButton,
+                refresh: showMenuAdmin,
+            });
         });
 
         row.append(title, editButton, deleteButton);
@@ -321,31 +333,4 @@ export async function showMenuAdmin(editId = null) {
 
         if (isCurrentView(viewId)) await showMenuAdmin();
     });
-}
-
-async function deleteMenuItem(id, button) {
-    const viewId = state.viewVersion;
-    const confirmed = window.confirm(
-        t(
-            "Ջնջե՞լ կատեգորիան։ Դրա ապրանքները կմնան առանց կատեգորիայի, " +
-                "իսկ անմիջական ենթակետերը կդառնան հիմնական կատեգորիաներ։",
-        ),
-    );
-
-    if (!confirmed) {
-        return;
-    }
-
-    elements.message.textContent = "";
-    button.disabled = true;
-
-    try {
-        await request("/menu-items/" + id, "DELETE");
-    } catch (error) {
-        if (isCurrentView(viewId)) elements.message.textContent = error.message;
-        button.disabled = false;
-        return;
-    }
-
-    if (isCurrentView(viewId)) await showMenuAdmin();
 }

@@ -16,7 +16,7 @@ async function start() {
         state.currentUser = result.user;
 
         elements.navigation.innerHTML = `
-            <button id="products-button">${t("Բոլորը")}</button>
+            <button id="products-button">${t("Գլխաոր")}</button>
         `;
 
         document

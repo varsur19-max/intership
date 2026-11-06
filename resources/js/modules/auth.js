@@ -9,7 +9,6 @@ export function showForm(type) {
     const isRegister = type === "register";
     const title = isRegister ? t("Գրանցում") : t("Մուտք");
 
-    if (!isCurrentView(viewId)) return;
     elements.content.innerHTML = `
         <h2>${title}</h2>
 

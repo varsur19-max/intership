@@ -1,9 +1,9 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\MenuItemController;
 use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ContactController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'app')->name('home');
@@ -51,18 +51,18 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     Route::delete('/menu-items/{menuItem}', [MenuItemController::class, 'destroy'])
         ->whereNumber('menuItem');
+
+    Route::patch(
+        '/products/{product}/position',
+        [ProductController::class, 'reorder']
+    )
+        ->whereNumber('product');
+
 });
 
 Route::patch(
     '/products/{product}/category',
     [ProductController::class, 'moveToCategory']
-)
-    ->whereNumber('product')
-    ->middleware('auth');
-
-Route::patch(
-    '/products/{product}/position',
-    [ProductController::class, 'reorder']
 )
     ->whereNumber('product')
     ->middleware('auth');

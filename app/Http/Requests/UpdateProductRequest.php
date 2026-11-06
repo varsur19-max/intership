@@ -8,15 +8,7 @@ class UpdateProductRequest extends StoreProductRequest
 {
     public function authorize(): bool
     {
-        $user = $this->user();
-        $product = $this->route('product');
-
-        if (! $user) {
-            return false;
-        }
-
-        return (int) $product->user_id === (int) $user->id
-            || $user->isAdmin();
+        return $this->route('product')->isManagedBy($this->user());
     }
 
     protected function failedAuthorization(): void

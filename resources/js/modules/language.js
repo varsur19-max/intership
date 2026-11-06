@@ -1,3 +1,6 @@
+import { elements } from "./state";
+import englishTranslations from "../../../lang/en.json";
+
 let currentLanguage = "hy";
 try {
     if (localStorage.getItem("intership_language") === "en")
@@ -14,13 +17,13 @@ export function t(text) {
         : text;
 }
 
-export function setupLanguageButtons(onLanguageChange) {
+export function setupLanguageButtons() {
     document.documentElement.lang = currentLanguage;
     document.querySelectorAll("[data-i18n]").forEach((el) => {
         el.textContent = t(el.dataset.i18n);
     });
 
-    const container = document.getElementById("language-switcher");
+    const container = elements.languageSwitcher;
     container.textContent = "";
 
     const languages = [
@@ -65,9 +68,6 @@ export function setupLanguageButtons(onLanguageChange) {
             try {
                 localStorage.setItem("intership_language", language.code);
             } catch {
-                currentLanguage = language.code;
-                setupLanguageButtons(onLanguageChange);
-                onLanguageChange();
                 return;
             }
 
@@ -78,10 +78,8 @@ export function setupLanguageButtons(onLanguageChange) {
     });
 }
 
-// Warn before a language change would discard an unfinished form.
-document.addEventListener("input", (event) => {
-    if (event.target.form) event.target.form.dataset.dirty = "true";
-});
-document.addEventListener("change", (event) => {
-    if (event.target.form) event.target.form.dataset.dirty = "true";
+["input", "change"].forEach((type) => {
+    document.addEventListener(type, (event) => {
+        if (event.target.form) event.target.form.dataset.dirty = "true";
+    });
 });

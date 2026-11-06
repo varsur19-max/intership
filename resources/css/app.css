@@ -116,6 +116,9 @@ a {
     border: 0;
     background: transparent;
     font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 #language-switcher button.active {
     background: white;
@@ -876,13 +879,6 @@ footer > span:last-child {
         transition: none !important;
         scroll-behavior: auto !important;
     }
-}
-
-/* Draw language flags in CSS, including systems without flag emoji fonts. */
-#language-switcher button {
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 .language-flag {
     display: inline-block;

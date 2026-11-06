@@ -1,4 +1,5 @@
 {
+    "Գլխաոր": "main",
     "Բոլորը": "All",
     "Մուտք": "Log in",
     "Գրանցում": "Register",
@@ -107,7 +108,6 @@
     "Հերթականությունը չի կարող բացասական լինել։": "The sort order cannot be negative.",
     "Հերթականության արժեքը չափազանց մեծ է։": "The sort order is too large.",
     "Կատեգորիան չի կարող լինել իր կամ իր ենթակետի ներսում։": "A category cannot be placed inside itself or one of its descendants.",
-    "Այս գործողությունը հասանելի է միայն ադմինիստրատորին։": "Only administrators can perform this action.",
     "Կատեգորիան ավելացվեց։": "The category was added.",
     "Կատեգորիան թարմացվեց։": "The category was updated.",
     "Կատեգորիան ջնջվեց։": "The category was deleted.",
@@ -115,7 +115,6 @@
     "Դու իրավունք չունես տեղափոխելու այս ապրանքը։": "You are not allowed to move this product.",
     "Կատեգորիայի դաշտը բացակայում է։": "The category field is missing.",
     "Ապրանքը տեղափոխվեց։": "The product was moved.",
-    "Հերթականությունը կարող է փոխել միայն ադմինիստրատորը։": "Only administrators can change the order.",
     "Հերթականությունը չի փոխվել։": "The order has not changed.",
     "Ապրանքը այլևս հասանելի չէ։": "The product is no longer available.",
     "Հերթականությունը պահպանվեց։": "The order was saved.",

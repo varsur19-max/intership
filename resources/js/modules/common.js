@@ -3,6 +3,13 @@ import { hideSuggestions } from "./search.js";
 import { t } from "./language.js";
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+const statusMessages = {
+    401: "Շարունակելու համար մուտք գործիր։",
+    404: "Տվյալը չի գտնվել։ Թարմացրու ցուցակը։",
+    413: "Ուղարկված տվյալների չափը չափազանց մեծ է։",
+    419: "Սեսիան ժամկետանց է։ Թարմացրու էջը։",
+    429: "Չափազանց շատ փորձեր։ Փորձիր մեկ րոպեից։",
+};
 
 export function beginView(name) {
     elements.content.dataset.view = name;
@@ -46,30 +53,12 @@ export async function request(url, method = "GET", data = null) {
     }
     if (response.status >= 500)
         throw new Error(t("Սերվերի սխալ։ Փորձիր ավելի ուշ։"));
-    if (response.status === 401)
-        throw new Error(t("Շարունակելու համար մուտք գործիր։"));
-    if (response.status === 404)
-        throw new Error(t("Տվյալը չի գտնվել։ Թարմացրու ցուցակը։"));
 
-    if (response.status === 413) {
-        throw new Error(t("Ուղարկված տվյալների չափը չափազանց մեծ է։"));
-    }
-
-    if (response.status === 419) {
-        throw new Error(t("Սեսիան ժամկետանց է։ Թարմացրու էջը։"));
-    }
-
-    if (response.status === 429) {
-        throw new Error(t("Չափազանց շատ փորձեր։ Փորձիր մեկ րոպեից։"));
-    }
-
-    const contentType = response.headers.get("Content-Type") || "";
-
-    if (!contentType.includes("application/json")) {
-        throw new Error(t("Սերվերից ստացվել է անվավեր պատասխան։"));
-    }
+    if (statusMessages[response.status])
+        throw new Error(t(statusMessages[response.status]));
 
     let result;
+
     try {
         result = await response.json();
     } catch {
@@ -92,4 +81,22 @@ export async function request(url, method = "GET", data = null) {
     }
 
     return result;
+}
+
+export async function confirmAndDelete({ url, question, button, refresh }) {
+    if (!window.confirm(question)) return;
+
+    const viewId = state.viewVersion;
+    elements.message.textContent = "";
+    button.disabled = true;
+
+    try {
+        await request(url, "DELETE");
+    } catch (error) {
+        if (isCurrentView(viewId)) elements.message.textContent = error.message;
+        button.disabled = false;
+        return;
+    }
+
+    if (isCurrentView(viewId)) await refresh();
 }

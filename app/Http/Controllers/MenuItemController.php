@@ -21,7 +21,6 @@ class MenuItemController extends Controller
 
     public function store(Request $request): JsonResponse
     {
-        $this->checkAdmin($request);
 
         $data = $this->validateItem($request);
 
@@ -34,7 +33,6 @@ class MenuItemController extends Controller
 
     public function update(Request $request, MenuItem $menuItem): JsonResponse
     {
-        $this->checkAdmin($request);
 
         $data = $this->validateItem($request);
         $this->updateTree($menuItem, $data);
@@ -44,7 +42,7 @@ class MenuItemController extends Controller
 
     public function moveToParent(Request $request, MenuItem $menuItem): JsonResponse
     {
-        $this->checkAdmin($request);
+
         $data = $request->validate([
             'parent_id' => ['present', 'nullable', 'integer', 'exists:menu_items,id'],
         ], [
@@ -86,7 +84,7 @@ class MenuItemController extends Controller
 
                 $parent = $items->get($parentId);
 
-                if (!$parent) {
+                if (! $parent) {
                     throw ValidationException::withMessages([
                         'parent_id' => 'Ծնող կատեգորիան գոյություն չունի։',
                     ]);
@@ -99,24 +97,14 @@ class MenuItemController extends Controller
         }, 3);
     }
 
-    public function destroy(Request $request, MenuItem $menuItem): JsonResponse
+    public function destroy(MenuItem $menuItem): JsonResponse
     {
-        $this->checkAdmin($request);
 
         $menuItem->delete();
 
         return response()->json([
             'message' => 'Կատեգորիան ջնջվեց։',
         ]);
-    }
-
-    private function checkAdmin(Request $request): void
-    {
-        abort_unless(
-            $request->user()?->isAdmin(),
-            403,
-            'Այս գործողությունը հասանելի է միայն ադմինիստրատորին։'
-        );
     }
 
     private function validateItem(Request $request): array

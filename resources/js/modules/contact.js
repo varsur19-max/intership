@@ -73,6 +73,4 @@ function openContactModal() {
     });
 }
 
-document
-    .getElementById("contact-button")
-    .addEventListener("click", openContactModal);
+elements.contactButton.addEventListener("click", openContactModal);

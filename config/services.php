@@ -23,7 +23,7 @@ return [
     ],
 
     'contact' => [
-        'email' => env('CONTACT_EMAIL')
+        'email' => env('CONTACT_EMAIL'),
     ],
 
     'ses' => [

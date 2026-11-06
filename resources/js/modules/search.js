@@ -1,10 +1,8 @@
-import { state } from "./state.js";
+import { elements, state } from "./state.js";
 import { showProducts } from "./products.js";
 import { t } from "./language.js";
 
-const searchForm = document.getElementById("search-form");
-const searchInput = document.getElementById("search-input");
-const suggestionsBox = document.getElementById("search-suggestions");
+const { searchForm, searchInput, searchSuggestions: suggestionsBox } = elements;
 
 searchInput.placeholder = t("Որոնել ապրանք...");
 
