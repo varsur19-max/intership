@@ -112,9 +112,9 @@ class ProjectRegressionTest extends TestCase
         $product = $this->product($owner);
         $this->actingAs(User::factory()->create());
 
-        $this->putJson('/products/'.$product->id, $this->payload())->assertForbidden();
-        $this->patchJson('/products/'.$product->id.'/category', ['category_id' => null])->assertForbidden();
-        $this->deleteJson('/products/'.$product->id)->assertForbidden();
+        $this->putJson('/products/' . $product->id, $this->payload())->assertForbidden();
+        $this->patchJson('/products/' . $product->id . '/category', ['category_id' => null])->assertForbidden();
+        $this->deleteJson('/products/' . $product->id)->assertForbidden();
         $this->assertDatabaseHas('products', ['id' => $product->id, 'name' => 'Desk lamp', 'deleted_at' => null]);
     }
 
@@ -149,7 +149,7 @@ class ProjectRegressionTest extends TestCase
         $product = $this->product($owner);
 
         $this->actingAs($owner)
-            ->putJson('/products/'.$product->id, $this->payload(['price' => 'abc']))
+            ->putJson('/products/' . $product->id, $this->payload(['price' => 'abc']))
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['price']);
 
@@ -161,7 +161,7 @@ class ProjectRegressionTest extends TestCase
         $product = $this->product(User::factory()->create());
 
         $this->actingAs(User::factory()->create())
-            ->putJson('/products/'.$product->id, $this->payload(['name' => '']))
+            ->putJson('/products/' . $product->id, $this->payload(['name' => '']))
             ->assertForbidden();
     }
 
@@ -172,7 +172,7 @@ class ProjectRegressionTest extends TestCase
         $owner = User::factory()->create();
         $product = $this->product($owner, ['image' => 'products/old.png']);
 
-        $this->actingAs($owner)->putJson('/products/'.$product->id, $this->payload())->assertOk();
+        $this->actingAs($owner)->putJson('/products/' . $product->id, $this->payload())->assertOk();
         $this->assertDatabaseHas('products', ['id' => $product->id, 'name' => 'New lamp', 'image' => 'products/old.png']);
         Storage::disk('public')->assertExists('products/old.png');
     }
@@ -184,7 +184,7 @@ class ProjectRegressionTest extends TestCase
         $owner = User::factory()->create();
         $product = $this->product($owner, ['image' => 'products/old.png']);
 
-        $this->actingAs($owner)->postJson('/products/'.$product->id, $this->payload([
+        $this->actingAs($owner)->postJson('/products/' . $product->id, $this->payload([
             '_method' => 'PUT',
             'image' => UploadedFile::fake()->image('lamp.png'),
         ]))->assertOk();
@@ -201,7 +201,7 @@ class ProjectRegressionTest extends TestCase
         $owner = User::factory()->create();
         $product = $this->product($owner, ['image' => 'products/old.png']);
 
-        $this->actingAs($owner)->postJson('/products/'.$product->id, $this->payload([
+        $this->actingAs($owner)->postJson('/products/' . $product->id, $this->payload([
             '_method' => 'PUT',
             'image' => UploadedFile::fake()->create('script.php', 10, 'text/plain'),
         ]))->assertUnprocessable()->assertJsonValidationErrors(['image']);
@@ -214,9 +214,9 @@ class ProjectRegressionTest extends TestCase
     {
         $owner = User::factory()->create();
         $product = $this->product($owner);
-        $this->actingAs($owner)->deleteJson('/products/'.$product->id)->assertOk();
+        $this->actingAs($owner)->deleteJson('/products/' . $product->id)->assertOk();
         $this->assertSoftDeleted($product);
-        $this->getJson('/products/'.$product->id)->assertNotFound();
+        $this->getJson('/products/' . $product->id)->assertNotFound();
         $this->getJson('/products')->assertJsonPath('total', 0);
     }
 
@@ -229,7 +229,7 @@ class ProjectRegressionTest extends TestCase
         }
         $this->product($owner);
 
-        $this->getJson('/products?category_id='.$category->id.'&page=2')->assertOk()
+        $this->getJson('/products?category_id=' . $category->id . '&page=2')->assertOk()
             ->assertJsonPath('total', 6)->assertJsonPath('current_page', 2)->assertJsonCount(1, 'data');
         $this->getJson('/products?page=-1')->assertUnprocessable()->assertJsonValidationErrors(['page']);
     }
@@ -247,14 +247,14 @@ class ProjectRegressionTest extends TestCase
         $this->product($owner, ['category_id' => $grandchild->id]);
         $this->product($owner);
 
-        $this->getJson('/products?category_id='.$parent->id)
+        $this->getJson('/products?category_id=' . $parent->id)
             ->assertOk()
             ->assertJsonPath('total', 3);
 
-        $this->getJson('/products?category_id='.$child->id)
+        $this->getJson('/products?category_id=' . $child->id)
             ->assertJsonPath('total', 2);
 
-        $this->getJson('/products?category_id='.$grandchild->id)
+        $this->getJson('/products?category_id=' . $grandchild->id)
             ->assertJsonPath('total', 1);
     }
 
@@ -276,14 +276,14 @@ class ProjectRegressionTest extends TestCase
         $this->getJson('/products?search=LAMP')
             ->assertJsonPath('total', 2);
 
-        $this->getJson('/products?search=lamp&category_id='.$lighting->id)
+        $this->getJson('/products?search=lamp&category_id=' . $lighting->id)
             ->assertJsonPath('total', 1)
             ->assertJsonPath('data.0.name', 'Desk lamp');
 
         $this->getJson('/products?search=zzzz')
             ->assertJsonPath('total', 0);
 
-        $this->getJson('/products?search='.urlencode('%'))
+        $this->getJson('/products?search=' . urlencode('%'))
             ->assertJsonPath('total', 0);
     }
 
@@ -295,12 +295,12 @@ class ProjectRegressionTest extends TestCase
         $this->product($owner, ['name' => 'Chair']);
         $this->product($owner, ['name' => 'Սեղանի լամպ']);
 
-        $this->getJson('/products?search='.urlencode('Desk lmap'))
+        $this->getJson('/products?search=' . urlencode('Desk lmap'))
             ->assertOk()
             ->assertJsonPath('total', 0)
             ->assertJsonPath('suggestions.0', 'Desk lamp');
 
-        $this->getJson('/products?search='.urlencode('Սեղանի լամփ'))
+        $this->getJson('/products?search=' . urlencode('Սեղանի լամփ'))
             ->assertJsonPath('total', 0)
             ->assertJsonPath('suggestions.0', 'Սեղանի լամպ');
 
@@ -330,9 +330,9 @@ class ProjectRegressionTest extends TestCase
         $this->actingAs($user);
 
         $this->postJson('/menu-items', ['title' => 'Blocked', 'parent_id' => null, 'sort_order' => 0])->assertForbidden();
-        $this->patchJson('/menu-items/'.$category->id.'/parent', ['parent_id' => null])->assertForbidden();
-        $this->deleteJson('/menu-items/'.$category->id)->assertForbidden();
-        $this->patchJson('/products/'.$product->id.'/position', ['before_id' => $product->id])->assertForbidden();
+        $this->patchJson('/menu-items/' . $category->id . '/parent', ['parent_id' => null])->assertForbidden();
+        $this->deleteJson('/menu-items/' . $category->id)->assertForbidden();
+        $this->patchJson('/products/' . $product->id . '/position', ['before_id' => $product->id])->assertForbidden();
         $this->assertModelExists($category);
         $this->assertDatabaseCount('menu_items', 1);
     }
@@ -341,7 +341,7 @@ class ProjectRegressionTest extends TestCase
     {
         $parent = MenuItem::create(['title' => 'Parent']);
         $child = MenuItem::create(['title' => 'Child', 'parent_id' => $parent->id]);
-        $this->actingAs($this->admin())->patchJson('/menu-items/'.$parent->id.'/parent', ['parent_id' => $child->id])
+        $this->actingAs($this->admin())->patchJson('/menu-items/' . $parent->id . '/parent', ['parent_id' => $child->id])
             ->assertUnprocessable()->assertJsonValidationErrors(['parent_id']);
         $this->assertDatabaseHas('menu_items', ['id' => $parent->id, 'parent_id' => null]);
     }
@@ -350,7 +350,7 @@ class ProjectRegressionTest extends TestCase
     {
         $parent = MenuItem::create(['title' => 'Parent']);
         $child = MenuItem::create(['title' => 'Latest title', 'sort_order' => 7]);
-        $this->actingAs($this->admin())->patchJson('/menu-items/'.$child->id.'/parent', [
+        $this->actingAs($this->admin())->patchJson('/menu-items/' . $child->id . '/parent', [
             'parent_id' => $parent->id,
             'title' => 'Stale title',
             'sort_order' => 0,
@@ -363,7 +363,7 @@ class ProjectRegressionTest extends TestCase
         $parent = MenuItem::create(['title' => 'Parent']);
         $child = MenuItem::create(['title' => 'Child', 'parent_id' => $parent->id]);
         $product = $this->product(User::factory()->create(), ['category_id' => $parent->id]);
-        $this->actingAs($this->admin())->deleteJson('/menu-items/'.$parent->id)->assertOk();
+        $this->actingAs($this->admin())->deleteJson('/menu-items/' . $parent->id)->assertOk();
 
         $this->assertDatabaseMissing('menu_items', ['id' => $parent->id]);
         $this->assertDatabaseHas('menu_items', ['id' => $child->id, 'parent_id' => null]);
@@ -380,7 +380,7 @@ class ProjectRegressionTest extends TestCase
         $originalUpdatedAt = $third->updated_at->toDateTimeString();
         $this->travel(1)->hour();
 
-        $this->actingAs($admin)->patchJson('/products/'.$third->id.'/position', ['before_id' => $first->id])->assertOk();
+        $this->actingAs($admin)->patchJson('/products/' . $third->id . '/position', ['before_id' => $first->id])->assertOk();
         $this->assertSame([$third->id, $first->id, $second->id], Product::orderBy('sort_order')->pluck('id')->all());
         $this->assertSame($originalUpdatedAt, $third->fresh()->updated_at->toDateTimeString());
     }
@@ -393,7 +393,7 @@ class ProjectRegressionTest extends TestCase
         $third = $this->product($admin, ['sort_order' => 30]);
 
         $this->actingAs($admin)
-            ->patchJson('/products/'.$third->id.'/position', ['before_id' => $second->id])
+            ->patchJson('/products/' . $third->id . '/position', ['before_id' => $second->id])
             ->assertOk();
 
         $this->assertSame(
@@ -450,5 +450,10 @@ class ProjectRegressionTest extends TestCase
         $column = collect(Schema::getColumns('users'))->firstWhere('name', 'username');
 
         $this->assertFalse($column['nullable']);
+    }
+
+    public function test_database_connection_works(): void
+    {
+        $this->assertNotNull(\DB::connection()->getPdo());
     }
 }
