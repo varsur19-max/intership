@@ -456,4 +456,9 @@ class ProjectRegressionTest extends TestCase
     {
         $this->assertNotNull(\DB::connection()->getPdo());
     }
+
+    public function test_home_page_loads(): void
+    {
+        $this->get('/')->assertStatus(200);
+    }
 }
